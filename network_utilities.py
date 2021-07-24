@@ -83,17 +83,17 @@ def create_random_graphs(G, n_random, randomization_type, allow_self_edges, out_
             g = permute_graph_at_given_percentage(G, percentage, allow_self_edges = allow_self_edges)
         else:
             g = randomize_graph(G, randomization_type, allow_self_edges)
-        dump_file = "%s_%d.pcl" % (out_prefix, i)
+        dump_file = "{}_{}.pcl".format(out_prefix, i)
         cPickle.dump(g, open(dump_file, 'w'))
-        dump_file = "%s_sp_%d.pcl" % (out_prefix, i)
+        dump_file = "{}_sp_{}.pcl".format(out_prefix, i)
         sp = get_shortest_path_lengths(g, dump_file)
     return
 
 def get_random_graphs(n_random, out_prefix):
     for i in range(n_random):
-        dump_file = "%s_%d.pcl" % (out_prefix, i)
+        dump_file = "{}_{}.pcl".format(out_prefix, i)
         g = cPickle.load(open(dump_file))
-        dump_file = "%s_sp_%d.pcl" % (out_prefix, i)
+        dump_file = "{}_sp_{}.pcl".format(out_prefix, i)
         sp = cPickle.load(open(dump_file))
         yield i, g, sp
 
@@ -1209,7 +1209,7 @@ def output_node_info(g, node_to_label, out_file, default_label="", node_to_name=
         if node_to_name is not None:
             if u in node_to_name:
                 name = node_to_name[u]
-        f.write("%s\t%s\n" % (name, label))
+        f.write("{}\t{}\n".format(name, label))
     f.close()
 
 def output_network_in_sif(g, output_file_name, node_to_desc=None, delim = " ", include_unconnected=True, remove_self=True):
@@ -1227,7 +1227,7 @@ def output_network_in_sif(g, output_file_name, node_to_desc=None, delim = " ", i
         if remove_self:
             if desc1 == desc2:
                 continue
-        f.write("%s%s%s%s%s\n" % (desc1, delim, weight, delim, desc2) )
+        f.write("{}{}{}{}{}\n".format(desc1, delim, weight, delim, desc2) )
         included_nodes.add(desc1)
         included_nodes.add(desc2)
     if include_unconnected:
@@ -1237,7 +1237,7 @@ def output_network_in_sif(g, output_file_name, node_to_desc=None, delim = " ", i
             else:
                 desc = u
             if desc not in included_nodes:
-                f.write("%s\n" % desc)
+                f.write("{}\n".format(desc))
     f.close()
     return
 
@@ -1249,26 +1249,26 @@ def analyze_network(g, out_file = None, seeds = None, calculate_radius = False):
         file = open(out_file, "a")
         out_method = file.write
     # print(networkx.info(g)) # currently buggy but fixed in the next version of networkx
-    out_method("(V,E): %d %d\n" % (g.number_of_nodes(), g.number_of_edges()))
-    out_method("V/E: %f\n" % (int(g.number_of_nodes()) / float(g.number_of_edges())))
+    out_method("(V,E): {} {}\n".format(g.number_of_nodes(), g.number_of_edges()))
+    out_method("V/E: {}\n".format(int(g.number_of_nodes()) / float(g.number_of_edges())))
     degrees = zip(*list(g.degree()))[1]
     degrees.sort()
-    out_method("Average degree: %f\n" % float(sum(degrees)/float(len(degrees))))
-    out_method("Most connected 20 nodes: %s\n" % degrees[-20:])
+    out_method("Average degree: {}\n".format(float(sum(degrees)/float(len(degrees)))))
+    out_method("Most connected 20 nodes: {}\n".format(degrees[-20:]))
     connected_components = networkx.connected_components(g)
-    out_method("Connected component sizes: %s\n" % map(len, connected_components))
+    out_method("Connected component sizes: {}\n".format(map(len, connected_components)))
     # Radius calculation is very time consuming
     if calculate_radius:
-        out_method("Radius (of the largest connected component): %d\n" % get_network_radius(g.subgraph(connected_components[0])))
+        out_method("Radius (of the largest connected component): {}\n".format(get_network_radius(g.subgraph(connected_components[0]))))
     #print(get_network_degree_histogram(g))
     if seeds is not None:
         if len(seeds) <= 1:
-            out_method("Average linker degree: %f\n" % (0))
-            out_method("Average seed connecting shortest paths length: %f\n" % (0))
+            out_method("Average linker degree: {}\n".format(0))
+            out_method("Average seed connecting shortest paths length: {}\n".format(0))
         else:
             node_to_ld = get_node_linker_degrees(g, seeds)
             vals = [ node_to_ld[v] for v in seeds ]
-            out_method("Average linker degree: %f\n" % (float(sum(vals))/len(vals)))
+            out_method("Average linker degree: {}\n".format(float(sum(vals))/len(vals)))
             #sp_lengths = networkx.all_pairs_shortest_path_length(g)
             sum_length = 0
             count = 0
@@ -1278,7 +1278,7 @@ def analyze_network(g, out_file = None, seeds = None, calculate_radius = False):
                     if j<i:
                         sum_length += sp_lengths[v] #[u][v]
                         count += 1
-            out_method("Average seed connecting shortest paths length: %f\n" % (float(sum_length)/count))
+            out_method("Average seed connecting shortest paths length: {}\n".format(float(sum_length)/count))
     if out_file is not None:
         file.close()
     return
@@ -1617,11 +1617,11 @@ def randomize_graph(graph, randomization_type, allow_self_edges = False):
                     nodes_by_degree[source_degree].setdefault(source_id)
                     continue
                 if debug:
-                    print("rm %s %s" % (source_id, target_id))
+                    print("rm {} {}".format(source_id, target_id))
                 edge_data = new_graph.get_edge_data(source_id, target_id)
                 new_graph.remove_edge(source_id, target_id)
                 if debug:
-                    print("add %s %s" % (new_source_id, new_target_id))
+                    print("add {} {}".format(new_source_id, new_target_id))
                 new_graph.add_edge(new_source_id, new_target_id, edge_data)
                 del nodes_by_degree[target_degree-1][new_target_id] 
                 nodes_by_degree[target_degree].setdefault(new_target_id)
@@ -1711,20 +1711,20 @@ def randomize_graph(graph, randomization_type, allow_self_edges = False):
                 if new_graph.has_edge(source_id, new_target_id) or new_graph.has_edge(new_source_id, target_id):
                     continue
                 if debug:
-                    print("rm %d %d" % (source_id, target_id))
-                    print("rm %d %d" % (new_source_id, new_target_id))
+                    print("rm {} {}".format(source_id, target_id))
+                    print("rm {} {}".format(new_source_id, new_target_id))
                 edge_data_1 = new_graph.get_edge_data(source_id, target_id)
                 edge_data_2 = new_graph.get_edge_data(new_source_id, new_target_id)
                 new_graph.remove_edge(source_id, target_id)
                 new_graph.remove_edge(new_source_id, new_target_id)
                 if debug:
-                    print("add %d %d" % (source_id, new_target_id))
-                    print("add %d %d" % (new_source_id, target_id))
+                    print("add {} {}".format(source_id, new_target_id))
+                    print("add {} {}".format(new_source_id, target_id))
                 new_graph.add_edge(source_id, new_target_id, edge_data_1)
                 new_graph.add_edge(new_source_id, target_id, edge_data_2)
 
     else:
-        raise Exception("Unknown randomization type %s" % randomization_type)
+        raise Exception("Unknown randomization type {}".format(randomization_type))
 
     return new_graph
 
@@ -1791,10 +1791,10 @@ def prune_graph_at_given_percentage(graph, percentage):
 def create_R_analyze_network_script(g, seeds = None, out_path = "./", title = "", scale_by_log=False):
     if scale_by_log:
         f = open(out_path + "analyze_network_log_scaled.r", "w")
-        f.write("postscript(\"%sanalyze_network_log_scaled.eps\", width = 6, height = 6, horizontal = FALSE, onefile = FALSE, paper = \"special\", title = \"%s\")\n" % (out_path, title))
+        f.write("postscript(\"{}analyze_network_log_scaled.eps\", width = 6, height = 6, horizontal = FALSE, onefile = FALSE, paper = \"special\", title = \"{}\")\n".format(out_path, title))
     else:
         f = open(out_path + "analyze_network.r", "w")
-        f.write("postscript(\"%sanalyze_network.eps\", width = 6, height = 6, horizontal = FALSE, onefile = FALSE, paper = \"special\", title = \"%s\")\n" % (out_path, title))
+        f.write("postscript(\"{}analyze_network.eps\", width = 6, height = 6, horizontal = FALSE, onefile = FALSE, paper = \"special\", title = \"{}\")\n".format(out_path, title))
     f.write("par(mfrow=c(3,2))\n")
     
     node_to_values = get_node_degree_related_values(g, seeds)
@@ -1815,13 +1815,13 @@ def create_R_analyze_network_script(g, seeds = None, out_path = "./", title = ""
             seed_degree_counts[d] += 1
         else:
             non_seed_degree_counts[d] += 1
-    f.write("n<-c(%s)\n" % ",".join(map(str, seed_degree_counts)))
-    f.write("N<-c(%s)\n" % ",".join(map(str, non_seed_degree_counts)))
+    f.write("n<-c({})\n".format(",".join(map(str, seed_degree_counts))))
+    f.write("N<-c({})\n".format(",".join(map(str, non_seed_degree_counts))))
     f.write("s<-(n+N)\n")
     if scale_by_log:
         f.write("A<-matrix(c(f(n), f(N+n)-f(n)), nrow=2, byrow=TRUE)\n")
         f.write("barplot(A, yaxt=\"n\", names.arg=c(0:(length(n)-1)), legend.text=c(\"seed\",\"all\"), col=heat.colors(2), xlab=\"Degree\", ylab=\"Number of nodes (Log scale)\")\n")
-        f.write("axis(2, 0:5, labels=c(0,%s), las=2)\n" % ",".join(map(str, [ 10**i for i in range(5) ])))
+        f.write("axis(2, 0:5, labels=c(0,{}), las=2)\n".format(",".join(map(str, [ 10**i for i in range(5) ]))))
     else:
         f.write("A<-matrix(c(n, N), nrow=2, byrow=TRUE)\n")
         ##f.write("barplot(A, yaxp=c(0,max(N+n),1), xaxp=c(1, length(n), 1), legend.text=c(\"seed\",\"all\"), col=heat.colors(2), xlab=\"Degree\", ylab=\"Number of nodes\")\n")
@@ -1838,7 +1838,7 @@ def create_R_analyze_network_script(g, seeds = None, out_path = "./", title = ""
     f.write("plot(0:(length(s)-1), s, log=\"xy\", yaxt=\"n\", xlab=\"Degree (Log scale)\", ylab=\"Number of nodes (Log scale)\")\n")
     f.write("axis(2, las=2)\n")
     f.write("#plot(d, p, yaxt=\"n\", xlab=\"log(degree)\", ylab=\"log(# of nodes)\")\n")
-    f.write("#axis(2, 0:5, labels=c(0,%s), las=2)\n" % ",".join(map(str, [ 10**i for i in range(5) ])))
+    f.write("#axis(2, 0:5, labels=c(0,{}), las=2)\n".format(",".join(map(str, [ 10**i for i in range(5) ]))))
     f.write("abline(fit, col=2, lty=2)\n")
     f.write("legend(\"topright\", c(\"linear (ls) fit\"), col=c(2), lty=2)\n")
     #f.write("par(fig=c(0, 1, 0, 1))\n")
@@ -1859,14 +1859,14 @@ def create_R_analyze_network_script(g, seeds = None, out_path = "./", title = ""
             seed_ldegree_counts[ld] += 1
         else:
             non_seed_ldegree_counts[ld] += 1
-    f.write("ln<-c(%s)\n" % ",".join(map(str, seed_ldegree_counts)))
-    f.write("lN<-c(%s)\n" % ",".join(map(str, non_seed_ldegree_counts)))
+    f.write("ln<-c({})\n".format(",".join(map(str, seed_ldegree_counts))))
+    f.write("lN<-c({})\n".format(",".join(map(str, non_seed_ldegree_counts))))
     if scale_by_log:
         f.write("lA<-matrix(c(f(ln), f(lN+ln)-f(ln)), nrow=2, byrow=TRUE)\n")
         f.write("barplot(lA, yaxt=\"n\", names.arg=c(0:(length(ln)-1)), legend.text=c(\"seed\",\"all\"), col=heat.colors(2), xlab=\"Linker Degree\", ylab=\"Number of nodes (Log scale)\")\n")
         f.write("#lA<-matrix(c(f(lN+ln), f(ln)), nrow=2, byrow=TRUE)\n")
         f.write("#barplot(lA, beside=TRUE, yaxt=\"n\", names.arg=c(0:(length(ln)-1)), legend.text=rev(c(\"seed\",\"all\")), col=rev(heat.colors(2)), xlab=\"Linker Degree\", ylab=\"Number of nodes (Log scale)\")\n")
-        f.write("axis(2, 0:5, labels=c(0,%s), las=2)\n" % ",".join(map(str, [ 10**i for i in range(5) ])))
+        f.write("axis(2, 0:5, labels=c(0,{}), las=2)\n".format(",".join(map(str, [ 10**i for i in range(5) ]))))
     else:
         f.write("lA<-matrix(c(ln, lN), nrow=2, byrow=TRUE)\n")
         f.write("barplot(lA, ylim=c(0,round(max(s)/4)), names.arg=c(0:(length(ln)-1)), legend.text=c(\"seed\",\"all\"), col=heat.colors(2), xlab=\"Linker Degree\", ylab=\"Number of nodes\")\n")
@@ -1887,12 +1887,12 @@ def create_R_analyze_network_script(g, seeds = None, out_path = "./", title = ""
             seed_ld_ratio_counts[ratio] += 1
         else:
             non_seed_ld_ratio_counts[ratio] += 1
-    f.write("rn<-c(%s)\n" % ",".join(map(str, seed_ld_ratio_counts)))
-    f.write("rN<-c(%s)\n" % ",".join(map(str, non_seed_ld_ratio_counts)))
+    f.write("rn<-c({})\n".format(",".join(map(str, seed_ld_ratio_counts))))
+    f.write("rN<-c({})\n".format(",".join(map(str, non_seed_ld_ratio_counts))))
     if scale_by_log:
         f.write("rA<-matrix(c(f(rn), f(rN+rn)-f(rn)), nrow=2, byrow=TRUE)\n")
         f.write("barplot(rA, yaxt=\"n\", names.arg=c(0:(length(rn)-1)), legend.text=c(\"seed\",\"all\"), col=heat.colors(2), xlab=\"Linker degree / Degree\", ylab=\"Number of nodes (Log scale)\")\n")
-        f.write("axis(2, 0:5, labels=c(0,%s), las=2)\n" % ",".join(map(str, [ 10**i for i in range(5) ])))
+        f.write("axis(2, 0:5, labels=c(0,{}), las=2)\n".format(",".join(map(str, [ 10**i for i in range(5) ]))))
     else:
         f.write("rA<-matrix(c(rn, rN), nrow=2, byrow=TRUE)\n")
         f.write("barplot(rA, ylim=c(0,round(max(s)/4)), names.arg=c(0:(length(rn)-1)), legend.text=c(\"seed\",\"all\"), col=heat.colors(2), xlab=\"Linker degree / Degree\", ylab=\"Number of nodes\")\n")
@@ -1911,12 +1911,12 @@ def create_R_analyze_network_script(g, seeds = None, out_path = "./", title = ""
             seed_ld2_ratio_counts[ratio] += 1
         else:
             non_seed_ld2_ratio_counts[ratio] += 1
-    f.write("rn2<-c(%s)\n" % ",".join(map(str, seed_ld2_ratio_counts)))
-    f.write("rN2<-c(%s)\n" % ",".join(map(str, non_seed_ld2_ratio_counts)))
+    f.write("rn2<-c({})\n".format(",".join(map(str, seed_ld2_ratio_counts))))
+    f.write("rN2<-c({})\n".format(",".join(map(str, non_seed_ld2_ratio_counts))))
     if scale_by_log:
         f.write("rA2<-matrix(c(f(rn2), f(rN2+rn2)-f(rn2)), nrow=2, byrow=TRUE)\n")
         f.write("barplot(rA2, yaxt=\"n\", names.arg=c(0:(length(rn2)-1)), legend.text=c(\"seed\",\"all\"), col=heat.colors(2), xlab=\"Linker degree level2 / Degree level2\", ylab=\"Number of nodes (Log scale)\")\n")
-        f.write("axis(2, 0:5, labels=c(0,%s), las=2)\n" % ",".join(map(str, [ 10**i for i in range(5) ])))
+        f.write("axis(2, 0:5, labels=c(0,{}), las=2)\n".format(",".join(map(str, [ 10**i for i in range(5) ]))))
     else:
         f.write("rA2<-matrix(c(rn2, rN2), nrow=2, byrow=TRUE)\n")
         f.write("barplot(rA2, ylim=c(0,round(max(s)/4)), names.arg=c(0:(length(rn2)-1)), legend.text=c(\"seed\",\"all\"), col=heat.colors(2), xlab=\"Linker degree level2 / Degree level2\", ylab=\"Number of nodes\")\n")
@@ -1932,19 +1932,19 @@ def create_R_analyze_network_script(g, seeds = None, out_path = "./", title = ""
                 connected_component_seed_counts[len(connected_component)] += 1
             else:
                 connected_component_non_seed_counts[len(connected_component)] += 1
-    f.write("c<-c(%s)\n" % ",".join(map(str, connected_component_seed_counts)))
-    f.write("C<-c(%s)\n" % ",".join(map(str,  connected_component_non_seed_counts)))
+    f.write("c<-c({})\n".format(",".join(map(str, connected_component_seed_counts))))
+    f.write("C<-c({})\n".format(",".join(map(str,  connected_component_non_seed_counts))))
     if scale_by_log:
         f.write("cA<-matrix(c(f(c), f(C+c)-f(c)), nrow=2, byrow=TRUE)\n")
         #f.write("barplot(cA, yaxt=\"n\", log=\"x\", xaxp=c(0,length(c),1), legend.text=c(\"seed\",\"all\"), col=heat.colors(2), xlab=\"Connected component size (Log scale)\", ylab=\"Number of nodes (Log scale)\")\n")
         f.write("barplot(cA, yaxt=\"n\", xaxt=\"n\", legend.text=c(\"seed\",\"all\"), col=heat.colors(2), xlab=\"Connected component size (Log scale)\", ylab=\"Number of nodes (Log scale)\")\n")
-        f.write("axis(2, 0:5, labels=c(0,%s), las=2)\n" % ",".join(map(str, [ 10**i for i in range(5) ])))
+        f.write("axis(2, 0:5, labels=c(0,{}), las=2)\n".format(",".join(map(str, [ 10**i for i in range(5) ]))))
         f.write("axis(1, seq(1,length(c),round(length(c)/5)), labels=seq(1,length(c),round(length(c)/5)))\n")
     else:
         f.write("cA<-matrix(c(c, C), nrow=2, byrow=TRUE)\n")
         f.write("barplot(cA, ylim=c(0,round(max(s)/4)), names.arg=c(1:length(c)), legend.text=c(\"seed\",\"all\"), col=heat.colors(2), xlab=\"Connected component size\", ylab=\"Number of nodes\")\n")
 
-    f.write("mtext(\'%s\', outer=TRUE, line=-1)\n" % title) 
+    f.write("mtext(\'{}\', outer=TRUE, line=-1)\n".format(title))
     f.write("dev.off()\n")
     f.close()
     return
@@ -2001,7 +2001,7 @@ def create_ARFF_network_metrics_file(g, node_to_score, seeds, arff_file_name, ca
             c="not-involved"
         # id score degree linker_degree ld_ratio clustering_coeff betweenness_cent d2 ld2 ld_ratio2 class
         # v s d ld n1 cc bc d2 ld2 n2 c
-        f.write( ("%s" % delim).join( map(str, [v, s, d, ld, r1, cc, bc, d2, ld2, r2, c]) ) + "\n" )
+        f.write( ("{}".format(delim)).join( map(str, [v, s, d, ld, r1, cc, bc, d2, ld2, r2, c]) ) + "\n" )
     f.close()
     return
 
@@ -2013,7 +2013,7 @@ def create_dot_network_file(g, output_file, seeds=set(), node_to_desc = dict(), 
     """
     #g = create_network_from_sif_file(network_file)
     f = open(output_file, 'w')
-    f.write("graph %s {\nforcelabels=false;\noutputorder=edgesfirst\n" % "converted")
+    f.write("graph {} {\nforcelabels=false;\noutputorder=edgesfirst\n".format("converted"))
     #f.write("NA [style=invis];\n")
     #seeds = set(seed_to_desc.keys()) #set([ line.strip() for line in open(seed_file) ])
     
@@ -2033,53 +2033,53 @@ def create_dot_network_file(g, output_file, seeds=set(), node_to_desc = dict(), 
         for node in g.nodes():
             if len(set(g.neighbors(node))&seeds) > 1:
                 if node in seeds:
-                    f.write("%s [label=\"\" fillcolor=red root=true color=red height=0.05 width=0.05 shape=rect];\n" % (node)) 
+                    f.write("{} [label=\"\" fillcolor=red root=true color=red height=0.05 width=0.05 shape=rect];\n".format(node)) 
                 else:
-                    f.write("%s [label=\"\" color=green height=0.05 width=0.05 shape=rect];\n" % (node)) 
+                    f.write("{} [label=\"\" color=green height=0.05 width=0.05 shape=rect];\n".format(node)) 
             else:
                 if node in seeds:
-                    f.write("%s [label=\"\" fillcolor=red root=true color=red height=0.05 width=0.05 shape=rect];\n" % (node)) 
+                    f.write("{} [label=\"\" fillcolor=red root=true color=red height=0.05 width=0.05 shape=rect];\n".format(node)) 
                 else:
-                    f.write("%s [label=\"\" fixedsize=true height=0.05 width=0.05 shape=rect];\n" % (node)) 
+                    f.write("{} [label=\"\" fixedsize=true height=0.05 width=0.05 shape=rect];\n".format(node)) 
         ignored = set()
     elif draw_type == "linker_only":
         for node in g.nodes():
             if node in seeds:
-                f.write("%s [label=\"%s\" style=filled fillcolor=red root=true color=red height=0.05 width=0.05 shape=rect];\n" % (node, node_to_desc[node])) 
+                f.write("{} [label=\"{}\" style=filled fillcolor=red root=true color=red height=0.05 width=0.05 shape=rect];\n".format(node, node_to_desc[node])) 
             elif node in linkers: 
                 if node in ups: 
-                    f.write("%s [label=\"\" style=filled fillcolor=green color=green fixedsize=true height=0.05 width=0.05 shape=rect];\n" % (node)) 
+                    f.write("{} [label=\"\" style=filled fillcolor=green color=green fixedsize=true height=0.05 width=0.05 shape=rect];\n".format(node)) 
                 elif node in downs:
-                    f.write("%s [label=\"\" style=filled fillcolor=blue color=blue fixedsize=true height=0.05 width=0.05 shape=rect];\n" % (node)) 
+                    f.write("{} [label=\"\" style=filled fillcolor=blue color=blue fixedsize=true height=0.05 width=0.05 shape=rect];\n".format(node)) 
                 else:
-                    f.write("%s [label=\"\" fixedsize=true height=0.05 width=0.05 shape=rect];\n" % (node)) 
+                    f.write("{} [label=\"\" fixedsize=true height=0.05 width=0.05 shape=rect];\n".format(node)) 
         ignored = ((set(g.nodes()) - seeds) - linkers) 
     elif draw_type == "regulated_only":
         for node in g.nodes():
             if node in seeds:
-                f.write("%s [label=\"%s\" style=filled fillcolor=red root=true color=red height=0.05 width=0.05 shape=rect];\n" % (node, node_to_desc[node])) 
+                f.write("{} [label=\"{}\" style=filled fillcolor=red root=true color=red height=0.05 width=0.05 shape=rect];\n".format(node, node_to_desc[node])) 
             elif node in ups: 
-                f.write("%s [label=\"%s\" style=filled fillcolor=green color=green fixedsize=true height=0.05 width=0.05 shape=rect];\n" % (node, node_to_desc[node])) 
+                f.write("{} [label=\"{}\" style=filled fillcolor=green color=green fixedsize=true height=0.05 width=0.05 shape=rect];\n".format(node, node_to_desc[node])) 
             elif node in downs:
-                f.write("%s [label=\"%s\" style=filled fillcolor=blue color=blue fixedsize=true height=0.05 width=0.05 shape=rect];\n" % (node, node_to_desc[node])) 
+                f.write("{} [label=\"{}\" style=filled fillcolor=blue color=blue fixedsize=true height=0.05 width=0.05 shape=rect];\n".format(node, node_to_desc[node])) 
         ignored = ((set(g.nodes()) - seeds) - ups) - downs  
     elif draw_type == "seeds_only":
         for node in g.nodes():
             if node in seeds:
-                f.write("%s [label=\"%s\" style=filled fillcolor=red root=true color=red height=0.05 width=0.05 shape=rect];\n" % (node, node_to_desc[node])) 
+                f.write("{} [label=\"{}\" style=filled fillcolor=red root=true color=red height=0.05 width=0.05 shape=rect];\n".format(node, node_to_desc[node])) 
         ignored = set(g.nodes()) - seeds  
     elif draw_type == "all":
         for node in g.nodes():
             if node in seeds:
-                f.write("%s [label=\"%s\" style=filled fillcolor=red root=true color=red height=0.05 width=0.05 shape=rect];\n" % (node, node_to_desc[node])) 
+                f.write("{} [label=\"{}\" style=filled fillcolor=red root=true color=red height=0.05 width=0.05 shape=rect];\n".format(node, node_to_desc[node])) 
             elif node in ups: 
-                f.write("%s [label=\"\" style=filled fillcolor=green color=green fixedsize=true height=0.05 width=0.05 shape=rect];\n" % (node)) 
+                f.write("{} [label=\"\" style=filled fillcolor=green color=green fixedsize=true height=0.05 width=0.05 shape=rect];\n".format(node)) 
             elif node in downs:
-                f.write("%s [label=\"\" style=filled fillcolor=blue color=blue fixedsize=true height=0.05 width=0.05 shape=rect];\n" % (node)) 
+                f.write("{} [label=\"\" style=filled fillcolor=blue color=blue fixedsize=true height=0.05 width=0.05 shape=rect];\n".format(node)) 
             elif not any(map(lambda x: x!=node and x in node_to_desc, g.neighbors(node))):
                 continue # skip nodes with only self edge 
             else:
-                f.write("%s [label=\"%s\" fixedsize=true height=0.05 width=0.05 shape=rect];\n" % (node, "")) # node_to_desc[node]
+                f.write("{} [label=\"{}\" fixedsize=true height=0.05 width=0.05 shape=rect];\n".format(node, "")) # node_to_desc[node]
         ignored = set()
 
     for u,v in g.edges():
@@ -2090,17 +2090,17 @@ def create_dot_network_file(g, output_file, seeds=set(), node_to_desc = dict(), 
         # draw dashed lines for weak edges
         if len(weak_edges) > 0:
             if (u, v) in weak_edges:
-                f.write("%s -- %s [color=darkgrey, style=dashed];\n" % (u, v))
+                f.write("{} -- {} [color=darkgrey, style=dashed];\n".format(u, v))
             else:
-                f.write("%s -- %s [color=blue];\n" % (u, v))
+                f.write("{} -- {} [color=blue];\n".format(u, v))
         else:
             # skip edges between seeds
             #if u in seeds and v in seeds:
             #        continue
-            f.write("%s -- %s [color=blue];\n" % (u, v))
+            f.write("{} -- {} [color=blue];\n".format(u, v))
     f.write("}\n")
     f.close()
-    #os.system("dot %s -Tgif > %s.gif" % (dot_fname, dot_fname))
+    #os.system("dot {} -Tgif > {}.gif".format(dot_fname, dot_fname))
     return
 
 

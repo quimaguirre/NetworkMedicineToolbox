@@ -53,49 +53,49 @@ class FuncassociateClient(object):
 
 
     def functionate(self, query, species="Homo sapiens", namespace="entrezgene", genespace=None, mode="unordered", reps=2000, support=None, associations=None):
-	params_dict = { "query": query, 
-		       "species": species,
-		       "namespace": namespace,
-		       "mode": mode,
-		       "reps": reps
-			       }
-	if associations is not None:
-	    params_dict["support"] = support
-	if associations is not None:
-	    params_dict["associations"] = associations
-	    del params_dict["species"]
-	    del params_dict["namespace"]
-	if genespace is not None:
-	    params_dict["genespace"] = genespace
-	payload = {'id': 1,
-		   'method': 'functionate',
-		   'params': [ params_dict ], 
-		   'jsonrpc': '2.0'}
-	response = self.request(payload=payload)
-	#print response
+        params_dict = { "query": query, 
+                       "species": species,
+                       "namespace": namespace,
+                       "mode": mode,
+                       "reps": reps
+                               }
+        if associations is not None:
+            params_dict["support"] = support
+        if associations is not None:
+            params_dict["associations"] = associations
+            del params_dict["species"]
+            del params_dict["namespace"]
+        if genespace is not None:
+            params_dict["genespace"] = genespace
+        payload = {'id': 1,
+                   'method': 'functionate',
+                   'params': [ params_dict ], 
+                   'jsonrpc': '2.0'}
+        response = self.request(payload=payload)
+        #print(response)
         response = json.loads(response)
-	#self.close_conn()
+        #self.close_conn()
             
-	if "error" in response and response["error"] is not None:
-	    raise ValueError("Error %s" % response['error']['message'])
+        if "error" in response and response["error"] is not None:
+            raise ValueError("Error {}".format(response['error']['message']))
 
-	response = response['result']
-	return response
+        response = response['result']
+        return response
 
 
 if __name__ == '__main__':
     functionate(["YLR406C", "YCR031C", "YDR471W"], "Saccharomyces cerevisiae", "sgd_systematic")
     fa = FuncassociateClient()
-    print fa.available_species()
-    print fa.available_namespaces()
-    #print fa.go_associations()
+    print(fa.available_species())
+    print(fa.available_namespaces())
+    #print(fa.go_associations())
     payload = {'id': 1,
                'method': 'functionate',
                'params': [ { "query": ["YLR406C", "YCR031C", "YDR471W"],
-		   "species":"Saccharomyces cerevisiae",
-		   "namespace": "sgd_systematic"
-		   #"species":"Homo sapiens",
+                   "species":"Saccharomyces cerevisiae",
+                   "namespace": "sgd_systematic"
+                   #"species":"Homo sapiens",
                            }], 
                'jsonrpc': '2.0'}
-    print fa.request(payload=payload)
+    print(fa.request(payload=payload))
     fa.close_conn()

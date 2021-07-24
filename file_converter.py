@@ -14,18 +14,18 @@ def convert_ids_using_mapping_file(input_file, mapping_file, output_file, one_ge
     id_to_mapped_ids = get_id_to_mapped_id_mapping(mapping_file, delim=delim)
 
     values = []
-    #for node, d in node_to_data.iteritems():
+    #for node, d in node_to_data.items():
     for node in nodes: 
-	if node not in id_to_mapped_ids:
-	    continue
-	if one_gene_per_node:
-	    genes = [ id_to_mapped_ids[node][0] ]
-	else:
-	    genes = id_to_mapped_ids[node]
-	for gene in genes:
-	    #values.append((d, gene))
-	    values.append(gene)
-	    
+        if node not in id_to_mapped_ids:
+            continue
+        if one_gene_per_node:
+            genes = [ id_to_mapped_ids[node][0] ]
+        else:
+            genes = id_to_mapped_ids[node]
+        for gene in genes:
+            #values.append((d, gene))
+            values.append(gene)
+            
     values.sort()
     values.reverse()
     #i = 1
@@ -33,10 +33,10 @@ def convert_ids_using_mapping_file(input_file, mapping_file, output_file, one_ge
     #f2 = open(output_file + ".ranks", 'w')
     #for d, gene in values:
     for gene in values:
-	f.write("%s\n" % (gene))
-	#f.write("%s\t%s\n" % (gene, str(score)))
-	#f2.write("%s\t%d\n" % (gene, i))
-	#i += 1
+        f.write("{}\n".format(gene))
+        #f.write("{}\t{}\n".format(gene, str(score)))
+        #f2.write("{}\t{}\n".format(gene, i))
+        #i += 1
     f.close()
     #f2.close()
     return
@@ -48,10 +48,10 @@ def convert_mapping_file_to_reversed_mapping_file(node_mapping_file, delim="\t")
     f2 = open(node_mapping_file + ".reversed", 'w')
     words = open(node_mapping_file).readline().strip().split(delim)
     words.reverse()
-    f2.write("%s\n" % delim.join(words))
-    for node, mapped_ids in id_to_mapped_ids.iteritems():
-	#f.write("%s\t%s\n" % (node, mapped_ids[0]))
-	f2.write("%s\t%s\n" % (mapped_ids[0], node))
+    f2.write("{}\n".format(delim.join(words)))
+    for node, mapped_ids in id_to_mapped_ids.items():
+        #f.write("{}\t{}\n".format(node, mapped_ids[0]))
+        f2.write("{}\t{}\n".format(mapped_ids[0], node))
     #f.close()
     f2.close()
     return
@@ -62,13 +62,13 @@ def get_id_to_mapped_id_mapping(node_mapping_file, delim="\t", inner_delim = ","
     columns, id_to_mapped_ids = reader.read(fields_to_include = None, merge_inner_values = True)
    
     id_to_mapped_ids_formatted = {}
-    for node, vals in id_to_mapped_ids.iteritems():
-	vals = reduce(lambda x,y: x+y, vals)
-	if "-" in vals:
-	    vals.remove("-")
-	if len(vals) < 1:
-	    continue
-	id_to_mapped_ids_formatted[node] = vals
+    for node, vals in id_to_mapped_ids.items():
+        vals = reduce(lambda x,y: x+y, vals)
+        if "-" in vals:
+            vals.remove("-")
+        if len(vals) < 1:
+            continue
+        id_to_mapped_ids_formatted[node] = vals
     return id_to_mapped_ids_formatted
 
 
@@ -78,58 +78,58 @@ def create_id_mapping_file_from_gene_info(gene_info_file, gene_ids, output_file,
 
     f = open(output_file, 'w')
     f.write("geneid\tgenesymbol\n")
-    for node, vals in id_to_mapped_ids.iteritems():
-	vals = reduce(lambda x,y: x+y, vals)
-	if "-" in vals:
-	    vals.remove("-")
-	if len(vals) < 1:
-	    continue
-	if one_gene_per_node:
-	    f.write("%s\t%s\n" % (node, vals[0]))
-	else:
-	    [ f.write("%s\t%s\n" % (node, val)) for val in vals ]
+    for node, vals in id_to_mapped_ids.items():
+        vals = reduce(lambda x,y: x+y, vals)
+        if "-" in vals:
+            vals.remove("-")
+        if len(vals) < 1:
+            continue
+        if one_gene_per_node:
+            f.write("{}\t{}\n".format(node, vals[0]))
+        else:
+            [ f.write("{}\t{}\n".format(node, val)) for val in vals ]
     f.close()
     return
 
 def output_mapped_node_id_scores(output_scores_file, node_mapping_file, one_gene_per_node=True, output_file=None):
     """
-	Output mapped ids of nodes 
+        Output mapped ids of nodes 
     """
     dummy, dummy, node_to_score, dummy = network_utilities.get_nodes_and_edges_from_sif_file(file_name = output_scores_file, store_edge_type = False)
 
     id_to_mapped_ids = get_id_to_mapped_id_mapping(node_mapping_file)
 
     values = []
-    for node, score in node_to_score.iteritems():
-	if node not in id_to_mapped_ids:
-	    continue
-	if one_gene_per_node:
-	    genes = [ id_to_mapped_ids[node][0] ]
-	else:
-	    genes = id_to_mapped_ids[node]
-	for gene in genes:
-	    values.append((score, gene))
-	    
+    for node, score in node_to_score.items():
+        if node not in id_to_mapped_ids:
+            continue
+        if one_gene_per_node:
+            genes = [ id_to_mapped_ids[node][0] ]
+        else:
+            genes = id_to_mapped_ids[node]
+        for gene in genes:
+            values.append((score, gene))
+            
     values.sort()
     values.reverse()
     included = set()
     i = 1
     if output_file is not None:
-	f = open(output_file, 'w')
-	f2 = open(output_file + ".ranks", 'w')
-	f3 = open(output_file + ".unique", 'w')
-	for score, gene in values:
-	    f.write("%s\t%s\n" % (gene, str(score)))
-	    f2.write("%s\t%d\n" % (gene, i))
-	    if gene not in included:
-		f3.write("%s\t%s\n" % (gene, str(score)))
-	    included.add(gene)
-	    i += 1
-	f.close()
-	f2.close()
-	f3.close()
+        f = open(output_file, 'w')
+        f2 = open(output_file + ".ranks", 'w')
+        f3 = open(output_file + ".unique", 'w')
+        for score, gene in values:
+            f.write("{}\t{}\n".format(gene, str(score)))
+            f2.write("{}\t{}\n".format(gene, i))
+            if gene not in included:
+                f3.write("{}\t{}\n".format(gene, str(score)))
+            included.add(gene)
+            i += 1
+        f.close()
+        f2.close()
+        f3.close()
     else:
-	print "%s\t%f" % (gene, score)
+        print("{}\t{}".format(gene, score))
     return 
 
 
@@ -137,21 +137,21 @@ def convert_node_scores_to_edge_scores(network_file, node_file, output_file):
     f = open(node_file)
     geneid_to_score = {}
     for line in f:
-	geneid, score = line.strip().split("\t")
-	geneid_to_score[geneid] = float(score)
+        geneid, score = line.strip().split("\t")
+        geneid_to_score[geneid] = float(score)
     f.close()
     f = open(network_file)
     interactions = []
     for line in f:
-	geneid1, dummy, geneid2 = line.strip().split(" ")
-	score = (geneid_to_score[geneid1] + geneid_to_score[geneid2]) / 2
-	interactions.append((score, geneid1, geneid2))
+        geneid1, dummy, geneid2 = line.strip().split(" ")
+        score = (geneid_to_score[geneid1] + geneid_to_score[geneid2]) / 2
+        interactions.append((score, geneid1, geneid2))
     f.close()
     interactions.sort()
     interactions.reverse()
     f_out = open(output_file, 'w')
     for score, geneid1, geneid2 in interactions:
-	f_out.write("%s\t%s\t%f\n" % (geneid1, geneid2, score))
+        f_out.write("{}\t{}\t{}\n".format(geneid1, geneid2, score))
     f_out.close()
     return
 

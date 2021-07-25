@@ -5,7 +5,7 @@ import os, cPickle, numpy, random #, time,
 try:
     from indigo import indigo
 except:
-    print "Indigo not found, chemical similarity will not be available!" 
+    print("Indigo not found, chemical similarity will not be available!" )
 
 
 def get_drug_info(parameters, parser=None):
@@ -41,7 +41,7 @@ def get_drug_targets(parameters, parser=None, id_type="geneid"):
         parser = get_drugbank(parameters)
     target_types = set(parameters.get("target_type").split("|"))
     drug_to_uniprots = parser.get_targets(target_types, only_paction=parameters.get_boolean("only_paction"))
-    #print len(drug_to_uniprots), drug_to_uniprots.items()[:5]
+    #print(len(drug_to_uniprots), drug_to_uniprots.items()[:5])
     uniprot_ids = reduce(lambda x,y: x|y, drug_to_uniprots.values())
     if id_type == "uniprot":
         drug_to_targets = drug_to_uniprots
@@ -56,9 +56,9 @@ def get_drug_targets(parameters, parser=None, id_type="geneid"):
         for uniprot in uniprots:
             if uniprot in uniprot_to_id:
                 drug_to_targets.setdefault(drug, set()).add(uniprot_to_id[uniprot])
-    #print len(drug_to_targets), drug_to_targets.items()[:5]
-    #print drug_to_uniprots["DB00536"]
-    #print drug_to_targets["DB00536"]
+    #print(len(drug_to_targets), drug_to_targets.items()[:5])
+    #print(drug_to_uniprots["DB00536"])
+    #print(drug_to_targets["DB00536"])
     return drug_to_targets
 
 
@@ -79,7 +79,7 @@ def get_drugbank_ids_for_drugs(drugs, parameters=None, parser=None, check_synony
             if name in synonym_to_drug:
                 drug = synonym_to_drug[name]
                 if name in drug_to_db_id:
-                    print "Ignoring synonym for already matched id", name, drug_to_db_id[name], drug
+                    print("Ignoring synonym for already matched id", name, drug_to_db_id[name], drug)
                 else:
                     drug_to_db_id[name] = drug
         if name not in drug_to_db_id:
@@ -90,12 +90,12 @@ def get_drugbank_ids_for_drugs(drugs, parameters=None, parser=None, check_synony
                     if db_name.find(name) != -1:
                         found = True
                         drug_to_db_id[db_name] = drug
-                        print "Id found by text matching", name, drug
+                        print("Id found by text matching", name, drug)
                 if not found:
                     not_in_db.add(name)
             else:
                 not_in_db.add(name)
-    print "Not in DrugBank:", not_in_db
+    print("Not in DrugBank:", not_in_db)
     return drug_to_db_id
 
 
@@ -129,9 +129,9 @@ def get_drug_smiles_by_target(parameters, parser=None):
             for geneid in geneids:
                 for words in (smiles.split("\n"), smiles.split("<br"), smiles.split(";"), smiles.split()):
                     if len(words) > 1:
-                        print "Potential multiple smiles", smiles 
+                        print("Potential multiple smiles", smiles )
                     elif len(smiles) == 0:
-                        print "Empty smiles", smiles 
+                        print("Empty smiles", smiles )
                 smiles_to_geneids.setdefault(smiles, set()).add(geneid)
                 geneid_to_smile_strings.setdefault(geneid, set()).add(smiles)
     return smiles_to_geneids, geneid_to_smile_strings
@@ -141,8 +141,8 @@ def get_drug_drug_interactions(parameters, drug_names, out_file=None):
     parser = drug_info.get_drugbank(parameters)
     drug_to_db_id = drug_info.get_drugbank_ids_for_drugs(drug_names, parameters=None, parser=parser, check_synonyms=True, use_text_matching=False)
     db_id_to_interactions = parser.drug_to_interactions
-    #print len(db_id_to_interactions), db_id_to_interactions.items()[:3]
-    print len(drug_names), len(drug_to_db_id)
+    #print(len(db_id_to_interactions), db_id_to_interactions.items()[:3])
+    print(len(drug_names), len(drug_to_db_id))
     drugs_new = []
     for drug in drug_names:
         if drug not in drug_to_db_id:
@@ -258,7 +258,7 @@ def get_chemical_similarity_based_target_predictions(parameters, smiles_list, cu
     """
     parser = get_drugbank(parameters)
     smiles_to_geneids, geneid_to_smiles_strings = get_drug_smiles_by_target(parameters, parser)
-    #print len(geneid_to_smiles_strings), geneid_to_smiles_strings.items()[:5]
+    #print(len(geneid_to_smiles_strings), geneid_to_smiles_strings.items()[:5])
     all_smiles = reduce(lambda x,y: x|y, geneid_to_smiles_strings.values())
     smiles_to_smiles_similarity = {}
     for smiles1 in smiles_list:
@@ -267,7 +267,7 @@ def get_chemical_similarity_based_target_predictions(parameters, smiles_list, cu
             try:
                 d = get_smiles_similarity(smiles1, smiles2, fp_type="sim", metric="tanimoto") 
             except:
-                #print smiles1, smiles2 # chirality not possible
+                #print(smiles1, smiles2 # chirality not possible)
                 continue
             smiles_to_smiles_similarity[smiles1][smiles2] = d 
     smiles_to_geneids_predicted = {}
@@ -281,13 +281,13 @@ def get_chemical_similarity_based_target_predictions(parameters, smiles_list, cu
                     continue
                 if d >= cutoff:
                     smiles_to_query_smiles.setdefault(smiles, set()).add(smiles_query)
-        print "Drugs with matching smiles:", len(smiles_to_query_smiles)
+        print("Drugs with matching smiles:", len(smiles_to_query_smiles))
         smiles_to_geneids_predicted = get_side_effect_targets_fishers(smiles_to_geneids, smiles_to_query_smiles, cutoff=float(parameters.get("fdr_cutoff")), correct_pvalues=True)
     elif method == "any_smiles" or method == "at_least_one_above":
         for smiles in smiles_list:
             for smiles2, d in smiles_to_smiles_similarity[smiles].items():
                 if d >= cutoff:
-                    print smiles2, d
+                    print(smiles2, d)
                     geneids = smiles_to_geneids_predicted.setdefault(smiles, set())
                     geneids |= smiles_to_geneids[smiles2]
     elif method in ("majority_above", "all_above"):
@@ -296,7 +296,7 @@ def get_chemical_similarity_based_target_predictions(parameters, smiles_list, cu
                 values = []
                 for smiles2 in smiles_strings:
                     try:
-                        #print smiles2 # chirality not possible
+                        #print(smiles2) # chirality not possible
                         d = smiles_to_smiles_similarity[smiles][smiles2]
                         values.append(d >= cutoff)
                     except:
@@ -339,7 +339,7 @@ def get_side_effect_targets(parameters, source = "sider"):
         drug_to_side_effects = get_drug_side_effects(parameters, source) 
     elif source == "offsides":
         drug_to_side_effects = get_offsides(parameters)
-    #print len(drug_to_side_effects), drug_to_side_effects.items()[:5]
+    #print(len(drug_to_side_effects), drug_to_side_effects.items()[:5])
     # Side effect protein target sets w.r.t. FDR <=0.2
     side_effect_to_targets = get_side_effect_targets_fishers(drug_to_geneids, drug_to_side_effects, cutoff=float(parameters.get("fdr_cutoff")), correct_pvalues=True)
     cPickle.dump(side_effect_to_targets, open(dump_file,'w'))
@@ -380,7 +380,7 @@ def get_side_effect_target_symbols(parameters, source = "sider", output_file=Non
                 values.extend(list(geneid_to_name[target]))
         values.sort()
         side_effect_to_genes[side_effect] = set(values)
-        #print side_effect, len(targets), len(values)
+        #print(side_effect, len(targets), len(values))
         #values = targets
         if output_file is not None:
             f.write("\t{}\t{}\n".format(side_effect, "\t".join(values)))
@@ -404,7 +404,7 @@ def get_side_effect_targets_fishers(drug_to_geneids, drug_to_side_effects, cutof
         for side_effect in side_effects:
             side_effect_to_drugs.setdefault(side_effect, set()).add(drug)
         drugs_all.add(drug)
-    #print len(side_effect_to_drugs), side_effect_to_drugs.items()[:5]
+    #print(len(side_effect_to_drugs), side_effect_to_drugs.items()[:5])
     # Get target to drugs
     target_to_drugs = {}
     for drug, geneids in drug_to_geneids.items():
@@ -413,8 +413,8 @@ def get_side_effect_targets_fishers(drug_to_geneids, drug_to_side_effects, cutof
         for geneid in geneids:
             target_to_drugs.setdefault(geneid, set()).add(drug)
         if drug not in drugs_all:
-            print "Side effect info but no target info:", drug
-    #print len(target_to_drugs), target_to_drugs.items()[:5]
+            print("Side effect info but no target info:", drug)
+    #print(len(target_to_drugs), target_to_drugs.items()[:5])
     # Get side effect to targets
     side_effect_to_targets = {}
     n_less_than_five = 0
@@ -430,7 +430,7 @@ def get_side_effect_targets_fishers(drug_to_geneids, drug_to_side_effects, cutof
             tn = len(drugs_all) - (tp + fp + fn)
             oddsratio, pvalue = stat_utilities.fisher_exact(tp, fp, fn, tn, alternative="greater")
             #if target == "19" and side_effect == "nausea": 
-            #        print side_effect, oddsratio, pvalue
+            #        print(side_effect, oddsratio, pvalue)
             if correct_pvalues:
                 values.append((pvalue, target))
             else:
@@ -441,7 +441,7 @@ def get_side_effect_targets_fishers(drug_to_geneids, drug_to_side_effects, cutof
             for i, pvalue in enumerate(pvalues_new):
                 if pvalue <= cutoff:
                     side_effect_to_targets.setdefault(side_effect, set()).add(values[i][1])
-    #print len(side_effect_to_drugs), n_less_than_five, len(side_effect_to_targets)
+    #print(len(side_effect_to_drugs), n_less_than_five, len(side_effect_to_targets))
     return side_effect_to_targets
 
 
@@ -467,22 +467,22 @@ def get_drug_side_effects(parameters, source=None):
         return drugbank_id_to_side_effects 
     # Get sider info
     pubchem_to_indications, pubchem_to_side_effects = get_sider(parameters)
-    #print "SIDER"
-    #print len(pubchem_to_indications), pubchem_to_indications.items()[:5]
-    #print len(pubchem_to_side_effects), pubchem_to_side_effects.items()[:5]
+    #print("SIDER")
+    #print(len(pubchem_to_indications), pubchem_to_indications.items()[:5])
+    #print(len(pubchem_to_side_effects), pubchem_to_side_effects.items()[:5])
     # Get stitch drugbank mapping
     pubchem_to_drugbank_ids, pubchem_to_target_to_score = get_stitch(parameters)
-    #print "STITCH"
-    #print len(pubchem_to_drugbank_ids), pubchem_to_drugbank_ids.items()[:5]
-    #print len(pubchem_to_target_to_score), pubchem_to_target_to_score.items()[:5]
+    #print("STITCH")
+    #print(len(pubchem_to_drugbank_ids), pubchem_to_drugbank_ids.items()[:5])
+    #print(len(pubchem_to_target_to_score), pubchem_to_target_to_score.items()[:5])
     # Get drugbank pubchem mapping
     parser = get_drugbank(parameters)
     pubchem_to_drugbank_ids_db = {}
     for drug_to_values in (parser.drug_to_pubchem, parser.drug_to_pubchem_substance):
         for drugbank_id, pubchem in drug_to_values.items():
             pubchem_to_drugbank_ids_db.setdefault(pubchem, set()).add(drugbank_id)
-    #print "DB"
-    #print len(pubchem_to_drugbank_ids_db), pubchem_to_drugbank_ids_db.items()[:5]
+    #print("DB")
+    #print(len(pubchem_to_drugbank_ids_db), pubchem_to_drugbank_ids_db.items()[:5])
     drugbank_id_to_side_effects = {}
     for pubchem, side_effects in pubchem_to_side_effects.items(): 
         if pubchem not in pubchem_to_side_effects:
@@ -505,7 +505,7 @@ def get_drug_side_effects(parameters, source=None):
             for side_effect in pubchem_to_side_effects[pubchem]:
                 drugbank_id_to_side_effects.setdefault(drugbank_id, set()).add(side_effect)
         #if len(db_ids1 & db_ids2) == 0:
-        #    print pubchem, len(db_ids1 & db_ids2), len(db_ids1 | db_ids2), db_ids1, db_ids2
+        #    print(pubchem, len(db_ids1 & db_ids2), len(db_ids1 | db_ids2), db_ids1, db_ids2)
     cPickle.dump(drugbank_id_to_side_effects, open(dump_file,'w'))
     return drugbank_id_to_side_effects
 
@@ -530,7 +530,7 @@ def get_offsides(parameters):
     # Get offsides data
     parser = TsvReader.TsvReader(parameters.get("offsides_file"), delim="\t", inner_delim = None, quotation='"')
     header_to_idx, cid_to_values = parser.read(fields_to_include = ["stitch_id", "event", "pvalue", "bg_correction", "sider", "future_aers", "medeffect"], keys_to_include = None, merge_inner_values = False)
-    #print len(cid_to_values) #, cid_to_values.items()[:3]
+    #print(len(cid_to_values) #, cid_to_values.items()[:3])
     # Get stitch drugbank mapping
     pubchem_to_drugbank_ids, pubchem_to_target_to_score = get_stitch(parameters)
     # Get drugbank side effect mapping
@@ -540,7 +540,7 @@ def get_offsides(parameters):
     for cid, values in cid_to_values.items():
         side_effects |= set(map(lambda x: x.lower(), zip(*values)[0]))
     n_side_effects = len(side_effects)
-    #print "Number of side effects:", n_side_effects
+    #print("Number of side effects:", n_side_effects)
     for cid, values in cid_to_values.items():
         cid = cid[3:]
         if cid.startswith("1"):
@@ -552,7 +552,7 @@ def get_offsides(parameters):
             continue
         drugs = pubchem_to_drugbank_ids[cid]
         for side_effect, pval, bg_correction, sider, future_aers, medeffect in values:
-            #print side_effect, pval, bg_correction
+            #print(side_effect, pval, bg_correction)
             # Convert all lower / upper case starting side effect words to Sider format
             #side_effect = " ".join(map(lambda x: x[0].lower() + x[1:], side_effect.split(" ")))
             side_effect = side_effect.lower()
@@ -562,8 +562,8 @@ def get_offsides(parameters):
             if medeffect == "1": # and sider != "1": 
                 for drug in drugs:
                     drug_to_side_effects.setdefault(drug, set()).add(side_effect)
-    #print len(drug_to_side_effects), drug_to_side_effects.items()[:3]
-    #print "Drugs not in drugbank mapping:", len(not_in_db) #, not_in_db
+    #print(len(drug_to_side_effects), drug_to_side_effects.items()[:3]))
+    #print("Drugs not in drugbank mapping:", len(not_in_db)) #, not_in_db
     return drug_to_side_effects 
 
 
@@ -604,8 +604,8 @@ def get_nugent(parameters):
             #if count / count_total > 0.5: 
             if count >= 5:
                 drug_to_side_effects.setdefault(drug, set()).add(side_effect)
-    print len(drug_to_side_effects), drug_to_side_effects.items()[:3]
-    print "Drugs not in drugbank mapping:", len(not_in_db) #, not_in_db
+    print(len(drug_to_side_effects), drug_to_side_effects.items()[:3])
+    print("Drugs not in drugbank mapping:", len(not_in_db)) #, not_in_db
     return drug_to_side_effects 
 
 

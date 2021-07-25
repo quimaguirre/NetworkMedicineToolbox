@@ -370,12 +370,12 @@ def output_pvalue_file(score_file, background_file, seed_file=None, background_s
     values.sort()
     i = 0
     f = open(score_file + ".pval", 'w')
-    f.write("Id%sScore%sP-value\n" % (delim, delim)) #Adjusted_P-value
+    f.write("Id{}Score{}P-value\n".format(delim, delim)) #Adjusted_P-value
     for val, node in values: #node_to_significance.items():
         if seed_to_score is not None and node in seed_to_score:
-            f.write("%s%s%f%s%s\n" % (node, delim, node_to_score[node], delim, 0))
+            f.write("{}{}{:f}{}{}\n".format(node, delim, node_to_score[node], delim, 0))
         else:
-            f.write("%s%s%f%s%s\n" % (node, delim, node_to_score[node], delim, str(val)))
+            f.write("{}{}{:f}{}{}\n".format(node, delim, node_to_score[node], delim, str(val)))
         i += 1
     f.close()
     return
@@ -405,9 +405,9 @@ def output_edge_pvalue_file(network_file, score_file, background_file, seed_file
     values.sort()
     i = 0
     f = open(score_file + ".edge_pval", 'w')
-    f.write("Id1%sId2%sScore%sP-value\n" % (delim, delim, delim)) 
+    f.write("Id1{}Id2{}Score{}P-value\n".format(delim, delim, delim)) 
     for val, edge in values:
-        f.write("%s%s%s%s%f%s%s\n" % (edge[0], delim, edge[1], delim, edge_to_score[edge], delim, str(val)))
+        f.write("{}{}{}{}{:f}{}{}\n".format(edge[0], delim, edge[1], delim, edge_to_score[edge], delim, str(val)))
         i += 1
     f.close()
     return
@@ -437,7 +437,7 @@ def get_significance_among_node_scores(node_to_score, background_to_score, n_fol
         folds[i,:] = bins
     # Average values
     folds = mean(folds, axis=0)
-    #print("c(%s)" % ", ".join([ str(i) for i in folds]))
+    #print("c({})".format(", ".join([ str(i) for i in folds])))
     for node, score in node_to_score.items():
         # Find the bin the score falls under
         index = searchsorted(score_cutoffs, score)
@@ -553,8 +553,8 @@ def generate_cross_validation_node_score_files(nodes, seed_to_score, node_scores
     """
     seeds = seed_to_score.keys()
     for k, training, test in selection_utilities.k_fold_cross_validation(seeds, xval, randomize = True, replicable = replicable):
-        create_node_scores_file(nodes = nodes, node_to_score = seed_to_score, node_scores_file = node_scores_file+".%i"%k, ignored_nodes = test, default_score = default_score )
-        create_node_scores_file(nodes = test, node_to_score = seed_to_score, node_scores_file = node_scores_file+".%i.test"%k, ignored_nodes = None, default_score = default_score )
+        create_node_scores_file(nodes = nodes, node_to_score = seed_to_score, node_scores_file = node_scores_file+".{}".format(k), ignored_nodes = test, default_score = default_score )
+        create_node_scores_file(nodes = test, node_to_score = seed_to_score, node_scores_file = node_scores_file+".{}.test".format(k), ignored_nodes = None, default_score = default_score )
     return
 
 def generate_cross_validation_edge_score_as_node_score_files(edges, seed_to_score, edge_to_score, edge_scores_file, xval = 5, default_score = 0.01, replicable = 123):
@@ -572,7 +572,7 @@ def generate_cross_validation_edge_score_as_node_score_files(edges, seed_to_scor
     """
     seeds = seed_to_score.keys()
     for k, training, test in selection_utilities.k_fold_cross_validation(seeds, xval, randomize = True, replicable = replicable):
-        create_edge_scores_as_node_scores_file(edges = edges, node_to_score = seed_to_score, edge_to_score = edge_to_score, edge_scores_file = edge_scores_file+".%i"%k, ignored_nodes = test, default_score = default_score)
+        create_edge_scores_as_node_scores_file(edges = edges, node_to_score = seed_to_score, edge_to_score = edge_to_score, edge_scores_file = edge_scores_file+".{}".format(k), ignored_nodes = test, default_score = default_score)
     return
 
 def create_node_scores_file(nodes, node_to_score, node_scores_file, ignored_nodes = None, default_score = 0, delim=" "):
@@ -590,7 +590,7 @@ def create_node_scores_file(nodes, node_to_score, node_scores_file, ignored_node
                 score_v = node_to_score[v]
             else:
                 score_v = default_score
-        f.write("%s%s%f\n" % (v, delim, score_v))
+        f.write("{}{}{:f}\n".format(v, delim, score_v))
     f.close()
     return 
 
@@ -619,7 +619,7 @@ def create_edge_scores_as_node_scores_file(edges, node_to_score, edge_to_score, 
             weight = edge_to_score[(u,v)]
         elif (v,u) in edge_to_score:
             weight = edge_to_score[(v,u)]
-        f.write("%s%s%f%s%s\n" % (u, delim, weight*(score_u + score_v) / 2.0, delim, v))
+        f.write("{}{}{:f}{}{}\n".format(u, delim, weight*(score_u + score_v) / 2.0, delim, v))
     f.close()
     return
 

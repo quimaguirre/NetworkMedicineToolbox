@@ -1,6 +1,6 @@
 # toolbox
 
-**network-medicine-toolbox** is a forked version of the **toolbox** repository in Python 3. It encapsulates various scripts used for the analysis of disease and drug related biological data sets. 
+**NetworkMedicineToolbox** is a forked version of the **toolbox** repository in Python 3. It encapsulates various scripts used for the analysis of disease and drug related biological data sets. 
 It contains generic utilities for data processing (e.g., parsing, network-based analysis, proximity, etc, ...).
 
 Contents 

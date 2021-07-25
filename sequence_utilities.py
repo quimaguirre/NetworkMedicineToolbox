@@ -122,7 +122,7 @@ def find_all_occurrences_of_motif(motif, fasta_file):
         previous_line = line
         # Assumes properly formatted FASTA
         if len(line) != 70:
-            print "Line %d in FASTA file does not contain 70 characters" % (i+2)
+            print("Line {} in FASTA file does not contain 70 characters".format(i+2))
         base_position = -3 + i*70
         occurrences = search_motif(motif, sequence)
         for k in occurrences:

@@ -14,7 +14,7 @@ import random
 try:
     from toolbox.external.diamond import diamond
 except:
-    print "DIAMOnD not found and thus will not be available!"
+    print("DIAMOnD not found and thus will not be available!")
 
 ##### Id mapping related #####
 
@@ -36,7 +36,7 @@ def convert_to_geneid(file_name, id_type, id_mapping_file):
     elif id_type == "uniprot":
         name_to_geneid = get_uniprot_to_id(id_mapping_file, uniprot_ids=genes, only_min=True, key_function=int)
     else:
-        raise ValueError("Uknown id type: %s" % id_type)
+        raise ValueError("Unknown id type: {}".format(id_type))
     geneids = set([ name_to_geneid[gene] for gene in genes if gene in name_to_geneid ])
     genes_non = set([ gene for gene in genes if gene not in name_to_geneid ])
     print("Not found genes: {}".format(genes_non))
@@ -85,7 +85,7 @@ def get_mesh_disease_category_mapping(desc_file, rel_file, dump_file = None):
     mesh_id_to_top_ids = parse_umls.get_mesh_id_to_disease_category(desc_file, rel_file, dump_file)
     mesh_id_to_name, concept_id_to_mesh_id, mesh_id_to_name_with_synonyms = get_mesh_id_mapping(desc_file, rel_file, dump_file)
     mesh_name_to_parents = {}
-    for child, parents in mesh_id_to_top_ids.iteritems():
+    for child, parents in mesh_id_to_top_ids.items():
         name_child = mesh_id_to_name[concept_id_to_mesh_id[child]]
         values = []
         for parent in parents:
@@ -93,7 +93,7 @@ def get_mesh_disease_category_mapping(desc_file, rel_file, dump_file = None):
             values.append(name_parent.lower())
         values.sort()
         mesh_name_to_parents[name_child.lower()] = values
-    #print mesh_name_to_parents["asthma"], mesh_name_to_parents["psoriasis"]
+    #print(mesh_name_to_parents["asthma"], mesh_name_to_parents["psoriasis"])
     return mesh_name_to_parents
 
 
@@ -119,18 +119,18 @@ def get_homology_mapping(homologene_file, tax_id="10090", from_tax_id="9606", sy
 
 def get_network(network_file, only_lcc):
     network = network_utilities.create_network_from_sif_file(network_file, use_edge_data = False, delim = None, include_unconnected=True)
-    #print len(network.nodes()), len(network.edges())
+    #print(len(network.nodes()), len(network.edges()))
     if only_lcc and not network_file.endswith(".lcc"):
         print("Shrinking network to its LCC: {} nodes, {} edges".format(len(network.nodes()), len(network.edges())))
         components = network_utilities.get_connected_components(network, False)
         network = network_utilities.get_subgraph(network, components[0])
         print("Final shape: {} nodes, {} edges".format(len(network.nodes()), len(network.edges())))
-        #print len(network.nodes()), len(network.edges())
+        #print(len(network.nodes()), len(network.edges()))
         network_lcc_file = network_file + ".lcc"
         if not os.path.exists(network_lcc_file ):
             f = open(network_lcc_file, 'w')
             for u,v in network.edges():
-                f.write("%s 1 %s\n" % (u, v))
+                f.write("{} 1 {}\n".format(u, v))
             f.close()
     return network
 
@@ -142,7 +142,7 @@ def create_functional_network(links_file, mapping_file, cutoff = 900):
     output_file = CONFIG.get("network_file")
     parse_string.get_interactions(links_file, mapping_file, output_file, cutoff) #, include_score=True) 
     #network = get_network()
-    #print len(network.nodes()), len(network.edges())
+    #print(len(network.nodes()), len(network.edges()))
     return
 
 
@@ -155,12 +155,12 @@ def calculate_lcc_significance(network, nodes, nodes_random=None, bins=None, n_r
         network_nodes = list(network.nodes())
         #nodes_random = get_random_nodes(nodes, network, bins = bins, n_random = n_random, min_bin_size = min_bin_size, seed = seed)
         nodes_random = []
-        for i in xrange(n_random):
+        for i in range(n_random):
             random.shuffle(network_nodes)
             nodes_random.append(network_nodes[:len(nodes)])
     network_sub = network.subgraph(nodes)
     component_nodes = network_utilities.get_connected_components(network_sub, False)
-    #print component_nodes 
+    #print(component_nodes )
     d = len(component_nodes[0])
     values = numpy.empty(len(nodes_random)) 
     for i, nodes in enumerate(nodes_random):
@@ -189,7 +189,7 @@ def get_expression_info(gexp_file, process=None, delim=',', quote='"', R_header=
     f = open(gexp_file)
     reader = csv.reader(f, delimiter=delim, quotechar=quote)
     header = reader.next()
-    #print len(header), header
+    #print(len(header), header)
     if R_header == False:
         header = header[1:]
     cell_line_to_idx = dict([ (cell_line, i) for i, cell_line in enumerate(header) ])
@@ -212,8 +212,8 @@ def get_expression_info(gexp_file, process=None, delim=',', quote='"', R_header=
             gexp = numpy.abs(gexp)
         #if "na.rm" in process:
         #    idx = numpy.where(numpy.isnan(a)) # need to remove rows with NAs
-        #print gexp.shape, gexp_norm.shape
-        #print gexp[0,0], gexp_norm[0,0]
+        #print(gexp.shape, gexp_norm.shape)
+        #print(gexp[0,0], gexp_norm[0,0])
         #return gene_to_values, cell_line_to_idx
     if dump_file is not None:
         values = gexp, gene_to_idx, cell_line_to_idx
@@ -230,15 +230,15 @@ def get_de_genes(file_name, cutoff_adj = 0.05, cutoff_logfc=0.585, n_top=None, i
     header_to_idx, id_to_values = parser.read(fields_to_include, keys_to_include=None, merge_inner_values=False)
     if "" in id_to_values:
         del id_to_values[""]
-    #print len(id_to_values)
+    #print(len(id_to_values))
     #gene = "10458"
     #if gene in id_to_values:
-    #    print id_to_values[gene] 
+    #    print(id_to_values[gene])
     genes = set()
     genes_all = set()
     genes_up, genes_down = set(), set()
     values_gene = []
-    for gene, values in id_to_values.iteritems():
+    for gene, values in id_to_values.items():
         include = False
         positive = False
         for val in values:
@@ -280,11 +280,11 @@ def get_z_genes(file_name, cutoff_z = 2):
     genes.sort(key=lambda x: x[1])
     genes = numpy.array(zip(*genes)[0])
     sample_to_genes = {}
-    for cell_line, idx in cell_line_to_idx.iteritems():
+    for cell_line, idx in cell_line_to_idx.items():
         indices = numpy.abs(gexp[:,idx]) > cutoff_z 
         sample_to_genes[cell_line] = genes[indices]
         #if cell_line in ["GSM734834", "GSM734833"]: 
-        #    print cell_line, len(genes[indices]), genes[indices] 
+        #    print(cell_line, len(genes[indices]), genes[indices])
     return sample_to_genes
 
 
@@ -318,7 +318,7 @@ def get_pathway_info(pathway_file, prefix=None, nodes=None, max_pathway_size=Non
     pathway_to_geneids, geneid_to_pathways = parse_msigdb.get_msigdb_info(pathway_file, prefix, inner_delim=inner_delim)
     if nodes is not None or max_pathway_size is not None:
         pathway_to_geneids_mod = {}
-        for pathway, geneids in pathway_to_geneids.iteritems():
+        for pathway, geneids in pathway_to_geneids.items():
             if max_pathway_size is not None:
                 if len(geneids) > max_pathway_size:
                     continue
@@ -366,10 +366,10 @@ def get_comorbidity_info(comorbidity_file, disease_ontology_file, mesh_dump, cor
     correlation_type: phi (pearson correlation) | RR (favors rare disease pairs)
     """
     icd_to_mesh_ids = get_icd_to_mesh_ids(disease_ontology_file, id_type="ICD9CM")
-    #print len(icd_to_mesh_ids), icd_to_mesh_ids.items()[:5]
-    #print [ icd_to_mesh_ids[val] for val in ("289", "502", "578", "579", "542", "543")]
+    #print(len(icd_to_mesh_ids), icd_to_mesh_ids.items()[:5])
+    #print([ icd_to_mesh_ids[val] for val in ("289", "502", "578", "579", "542", "543")])
     mesh_id_to_name, concept_id_to_mesh_id, mesh_id_to_name_with_synonyms = get_mesh_id_mapping(None, None, dump_file = mesh_dump)
-    #print mesh_id_to_name.items()[:5]
+    #print(mesh_id_to_name.items()[:5])
     f = open(comorbidity_file)
     header_to_idx = dict((word, i) for i, word in enumerate(f.readline().strip().split("\t")))
     disease_to_disease_comorbidity = {}
@@ -379,17 +379,17 @@ def get_comorbidity_info(comorbidity_file, disease_ontology_file, mesh_dump, cor
         if only_significant and significance == "0":
             continue
         if icd1 not in icd_to_mesh_ids or icd2 not in icd_to_mesh_ids:
-            #print "Not in DO mapping:", icd1, icd2
+            #print("Not in DO mapping:", icd1, icd2)
             continue
         val = float(words[header_to_idx[correlation_type]]) # idx:5
         for mesh1 in icd_to_mesh_ids[icd1]:
             if mesh1 not in mesh_id_to_name:
-                #print "Not in name mapping:", mesh1
+                #print("Not in name mapping:", mesh1)
                 continue
             disease1 = mesh_id_to_name[mesh1].lower()
             for mesh2 in icd_to_mesh_ids[icd2]:
                 if mesh2 not in mesh_id_to_name:
-                    #print "Not in name mapping:", mesh2
+                    #print("Not in name mapping:", mesh2)
                     continue
                 disease2 = mesh_id_to_name[mesh2].lower()
                 disease1_mod, disease2_mod = sorted((disease1, disease2))
@@ -400,8 +400,8 @@ def get_comorbidity_info(comorbidity_file, disease_ontology_file, mesh_dump, cor
                 d[disease2] = val 
                 d = disease_to_disease_comorbidity.setdefault(disease2, {})
                 d[disease1] = val
-                #print icd1, mesh1, disease1, icd2, mesh2, disease2, val 
-    #print len(disease_to_disease_comorbidity), disease_to_disease_comorbidity.values()[0].items()[:5]
+                #print(icd1, mesh1, disease1, icd2, mesh2, disease2, val)
+    #print(len(disease_to_disease_comorbidity), disease_to_disease_comorbidity.values()[0].items()[:5])
     return disease_to_disease_comorbidity 
     # Parse HuDiNe data from potentially buggy comorbidity_new.tsv
     #comorbidity_file = CONFIG.get("comorbidity_file")
@@ -470,7 +470,7 @@ def get_medi_indications(medi_file, drugbank_file, mesh_dump, disease_ontology_f
     icd_to_mesh_ids = get_icd_to_mesh_ids(disease_ontology_file, id_type="ICD9CM")
     drug_to_indications = parse_medi.get_drug_disease_mapping(name_to_icd_and_confidences, name_to_drug, synonym_to_drug, icd_to_mesh_ids, mesh_id_to_name, dump_file = None) 
     drug_to_diseases = {}
-    for drug, values in drug_to_indications.iteritems():
+    for drug, values in drug_to_indications.items():
         for phenotype, dui, val in values:
             if only_hps and val <= 0.5:
                 continue
@@ -478,13 +478,13 @@ def get_medi_indications(medi_file, drugbank_file, mesh_dump, disease_ontology_f
     # Drug name to disease name textual mapping
     #name_to_indication_and_confidences = parse_medi.get_medi_mapping(medi_file, textual_indication=True)
     #drug_to_diseases = {}
-    #for name, values in name_to_indication_and_confidences.iteritems():
+    #for name, values in name_to_indication_and_confidences.items():
     #        for indication, confidence in values:
     #            if only_hps and confidence <= 0.5:
     #                continue
     #            drug_to_diseases.setdefault(name, set()).add(indication.lower())
     # Get disease to name mapping
-    #phenotype_to_mesh_id = dict((name, mesh_id) for mesh_id, name in mesh_id_to_name.iteritems())
+    #phenotype_to_mesh_id = dict((name, mesh_id) for mesh_id, name in mesh_id_to_name.items())
     #disease_to_drugs = parse_medi.get_disease_specific_drugs(drug_to_diseases, phenotype_to_mesh_id)
     cPickle.dump(drug_to_diseases, open(dump_file, 'w'))
     return drug_to_diseases
@@ -500,7 +500,7 @@ def get_hetionet_indications(hetionet_file, mesh_dump, disease_ontology_file):
     mesh_id_to_name, concept_id_to_mesh_id, mesh_id_to_name_with_synonyms = get_mesh_id_mapping(None, None, dump_file = mesh_dump)
     drug_to_indications = parse_hetionet.get_drug_disease_mapping(drug_to_do_ids, do_to_mesh_ids, mesh_id_to_name, dump_file = None)
     drug_to_diseases = {}
-    for drug, values in drug_to_indications.iteritems():
+    for drug, values in drug_to_indications.items():
         for phenotype, dui, val in values:
             drug_to_diseases.setdefault(drug, set()).add(phenotype)
     cPickle.dump(drug_to_diseases, open(dump_file, 'w'))
@@ -527,7 +527,7 @@ def overlap_significance(geneids1, geneids2, nodes, method="hyper"):
     elif method == "overlap":
         val = n
     else:
-        raise ValueError("Uknown method: %s" % method)
+        raise ValueError("Unknown method: {}".format(method))
     return n, n1, n2, val
 
 
@@ -576,7 +576,7 @@ def calculate_proximity_multiple(network, from_file=None, to_file=None, n_random
     """
     nodes = set(network.nodes())
     drug_to_targets, drug_to_category = get_diseasome_genes(from_file, nodes = nodes)
-    #drug_to_targets = dict((drug, nodes & targets) for drug, targets in drug_to_targets.iteritems())
+    #drug_to_targets = dict((drug, nodes & targets) for drug, targets in drug_to_targets.items())
     disease_to_genes, disease_to_category = get_diseasome_genes(to_file, nodes = nodes)
     # Calculate proximity values
     print(len(drug_to_targets), len(disease_to_genes))
@@ -584,17 +584,17 @@ def calculate_proximity_multiple(network, from_file=None, to_file=None, n_random
     bins = network_utilities.get_degree_binning(network, min_bin_size)
     f = open(out_file, 'w')
     f.write("source\ttarget\tn.source\tn.target\td\tz\n")
-    for drug, nodes_from in drug_to_targets.iteritems():
+    for drug, nodes_from in drug_to_targets.items():
         values = []
-        for disease, nodes_to in disease_to_genes.iteritems():
+        for disease, nodes_to in disease_to_genes.items():
             print(drug, disease)
             d, z, (m, s) = calculate_proximity(network, nodes_from, nodes_to, nodes_from_random=None, nodes_to_random=None, bins=bins, n_random=n_random, min_bin_size=min_bin_size, seed=seed, lengths=lengths)
             values.append((drug, disease, z, len(nodes_from), len(nodes_to), d, m, s))
-            #f.write("%s\t%s\t%f\t%f\t%f\t%f\n" % (drug, disease, z, d, m, s))
+            #f.write("{}\t{}\t{:f}\t{:f}\t{:f}\t{:f}\n".format(drug, disease, z, d, m, s))
         values.sort(key=lambda x: x[2])
         for drug, disease, z, k, l, d, m, s in values:
-            #f.write("%s\t%s\t%f\t%d\t%d\t%f\t%f\t%f\n" % (drug, disease, z, k, l, d, m, s))
-            f.write("%s\t%s\t%d\t%d\t%f\t%f\n" % (drug, disease, k, l, d, z))
+            #f.write("{}\t{}\t{:f}\t{:d}\t{:d}\t{:f}\t{:f}\t{:f}\n".format(drug, disease, z, k, l, d, m, s))
+            f.write("{}\t{}\t{:d}\t{:d}\t{:f}\t{:f}\n".format(drug, disease, k, l, d, z))
     f.close()
     return 
 
@@ -608,7 +608,7 @@ def calculate_closest_distance(network, nodes_from, nodes_to, lengths=None):
                 val = network_utilities.get_shortest_path_length_between(network, node_from, node_to)
                 values.append(val)
             d = min(values)
-            #print d,
+            #print(d,)
             values_outer.append(d)
     else:
         for node_from in nodes_from:
@@ -620,7 +620,7 @@ def calculate_closest_distance(network, nodes_from, nodes_to, lengths=None):
             d = min(values)
             values_outer.append(d)
     d = numpy.mean(values_outer)
-    #print d
+    #print(d)
     return d
 
 
@@ -732,33 +732,33 @@ def create_node_file(node_to_score, nodes, node_file, background_score = 0.01):
             score = node_to_score[node]
         else:
             score = background_score
-        f.write("%s %f\n" % (node, score))
+        f.write("{} {:f}\n".format(node, score))
     f.close()
     return
 
 
 def run_guild(phenotype, node_to_score, network_nodes, network_file, output_dir, executable_path = None, background_score = 0.01, qname=None, method='s'): 
     # Create node file
-    node_file = "%s%s.node" % (output_dir, phenotype)
+    node_file = "{}{}.node".format(output_dir, phenotype)
     create_node_file(node_to_score, network_nodes, node_file, background_score)
-    output_file = "%s%s.n%s" % (output_dir, phenotype, method)
+    output_file = "{}{}.n{}".format(output_dir, phenotype, method)
     # Get and run the GUILD command
-    #print strftime("%H:%M:%S - %d %b %Y") #, score_command
+    #print(strftime("%H:%M:{} - {:d} %b %Y")) #, score_command
     if method == 's': 
         n_repetition = 3 
         n_iteration = 2 
-        score_command = ' -s s -n "%s" -e "%s" -o "%s" -r %d -i %d' % (node_file, network_file, output_file, n_repetition, n_iteration)
+        score_command = ' -s s -n "{}" -e "{}" -o "{}" -r {:d} -i {:d}'.format(node_file, network_file, output_file, n_repetition, n_iteration)
     elif method == 'd':
-        score_command = ' -s d -n "%s" -e "%s" -o "%s"' % (node_file, network_file, output_file)
+        score_command = ' -s d -n "{}" -e "{}" -o "{}"'.format(node_file, network_file, output_file)
     elif method == 'r':
         n_iteration = 50 
-        score_command = ' -s r -n "%s" -e "%s" -o "%s" -i %d' % (node_file, network_file, output_file, n_iteration)
+        score_command = ' -s r -n "{}" -e "{}" -o "{}" -i {:d}'.format(node_file, network_file, output_file, n_iteration)
     elif method == 'p':
-        score_command = ' "%s" "%s" "%s" 1' % (node_file, network_file, output_file)
+        score_command = ' "{}" "{}" "{}" 1'.format(node_file, network_file, output_file)
     elif method == 'w':
-        score_command = ' "%s" "%s" "%s"' % (node_file, network_file, output_file)
+        score_command = ' "{}" "{}" "{}"'.format(node_file, network_file, output_file)
     else:
-        raise NotImplementedError("method %s" % method) 
+        raise NotImplementedError("method {}".format(method))
     if qname is None:
         if executable_path is None:
             if method in ["s", "r", "d"]:
@@ -769,8 +769,8 @@ def run_guild(phenotype, node_to_score, network_nodes, network_file, output_dir,
         print(score_command)
         os.system(score_command)
     else:
-        #os.system("qsub -cwd -o out -e err -q %s -N %s -b y %s" % (qname, scoring_type, score_command))
-        #print "qsub -cwd -o out -e err -q %s -N guild_%s -b y %s" % (qname, drug, score_command)
+        #os.system("qsub -cwd -o out -e err -q {} -N {} -b y {}".format(qname, scoring_type, score_command))
+        #print("qsub -cwd -o out -e err -q {} -N guild_{} -b y {}".format(qname, drug, score_command))
         print("{}".format(score_command.replace('"', '')))
     return score_command
 
@@ -805,21 +805,21 @@ def guildify_multiple(network_file, to_file, output_dir, from_file=None, out_fil
         #k = 1.0 * max(node_to_degree.values())
         values = set(zip(*values[:n])[0])
         f = open(output_dir + "/background.node", 'w')
-        for node, degree in node_to_degree.iteritems():
+        for node, degree in node_to_degree.items():
             #score = degree/k
             if node in values: score = 1
             else: score = 0.01
-            f.write("%s %f\n" % (node, score))
+            f.write("{} {:f}\n".format(node, score))
         f.close()
     if from_file is not None:
         drug_to_targets, drug_to_category = get_diseasome_genes(from_file, nodes = nodes)
         f = open(out_file, 'w')
         f.write("source\ttarget\tscore\n")
-    for target, geneids in disease_to_genes.iteritems():
-        #print target, len(geneids)
+    for target, geneids in disease_to_genes.items():
+        #print(target, len(geneids))
         target_mod = text_utilities.convert_to_R_string(target)
         target_to_score = dict((gene, 1.0) for gene in geneids)
-        node_file = output_dir + "%s.n%s" % (target_mod, method) 
+        node_file = output_dir + "{}.n{}".format(target_mod, method) 
         if os.path.exists(node_file):
             print("Skipping existing: {}".format(node_file))
             continue
@@ -829,9 +829,9 @@ def guildify_multiple(network_file, to_file, output_dir, from_file=None, out_fil
             values = map(float, numpy.array(node_to_score.values()))
             m = numpy.mean(values)
             s = numpy.std(values)
-            for source, geneids in drug_to_targets.iteritems():
+            for source, geneids in drug_to_targets.items():
                 score = -numpy.mean([(float(node_to_score[gene]) - m) / s for gene in geneids])
-                f.write("%s\t%s\t%f\n" % (source, target, score))
+                f.write("{}\t{}\t{:f}\n".format(source, target, score))
                 d = target_to_source_score.setdefault(target, {})
                 d[source] = score
     if from_file is not None:
@@ -854,7 +854,7 @@ def get_diamond_genes(network_file, seeds, file_name, only_lcc=True):
     network = get_network(network_file, only_lcc=only_lcc) 
     nodes = set(network.nodes())
     seeds = set(seeds) & nodes
-    #print len(seeds)
+    #print(len(seeds))
     n_iteration = 500
     if not os.path.exists(file_name):
         diamond.DIAMOnD(network, seeds, n_iteration, alpha = 1, outfile = file_name)
@@ -871,13 +871,13 @@ def get_diamond_genes(network_file, seeds, file_name, only_lcc=True):
         component = network.subgraph(seeds)
         #component = max(networkx.connected_components(component), key=len)
         components = max(network_utilities.get_connected_components(network, False), key=len)
-        f_out.write("%s %f\n" % ("0", len(component & seeds)/n))
+        f_out.write("{} {:f}\n".format("0", len(component & seeds)/n))
         for i, gene in enumerate(genes):
             rank = i + 1
             component = network.subgraph(genes[:rank] + list(seeds))
             #component = max(networkx.connected_components(component), key=len)
             components = max(network_utilities.get_connected_components(network, False), key=len)
-            f_out.write("%s %f\n" % (rank, len(component & seeds)/n))
+            f_out.write("{} {:f}\n".format(rank, len(component & seeds)/n))
         f_out.close()
     return genes, nodes
 

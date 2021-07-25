@@ -36,7 +36,7 @@ def main():
         out_file = args.out_file
         network = network_utilities.create_network_from_sif_file(network_file, use_edge_data = False, delim = None, include_unconnected=True)
     #print(args)
-    print network_file, nodes_from, nodes_to, n_random, min_bin_size, n_seed, out_file
+    print(network_file, nodes_from, nodes_to, n_random, min_bin_size, n_seed, out_file)
     values = wrappers.calculate_proximity(network, nodes_from = nodes_from, nodes_to = nodes_to, n_random = n_random, min_bin_size = min_bin_size, seed = n_seed)
     if values is not None: # not in network
         d, z, (m, s) = values

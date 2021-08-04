@@ -150,6 +150,10 @@ def calculate_lcc_significance(network, nodes, nodes_random=None, bins=None, n_r
     # Degree matching problematic for small bin sizes
     #if bins is None and nodes_random is None:
     #        bins = network_utilities.get_degree_binning(network, min_bin_size) 
+    # d = length of the LCC between the input nodes of interest
+    # z = z-score of the comparison of the LCC with a distribution of n_random nodes obtained randomly
+    # m = mean of the random distribution
+    # s = standard deviation of the random distribution
     random.seed(seed)
     if nodes_random is None:
         network_nodes = list(network.nodes())

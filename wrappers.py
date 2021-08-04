@@ -3,16 +3,16 @@
 # drug and network analysis
 # e.g. 10/2015
 #######################################################################
-import network_utilities, stat_utilities, dict_utilities, text_utilities
-import TsvReader, functional_enrichment
-import parse_umls, parse_msigdb 
-import parse_uniprot, parse_ncbi
-import parse_do, parse_medic, parse_disgenet
-import parse_drugbank, parse_medi, parse_hetionet
-import csv, numpy, os, cPickle
+from . import network_utilities, stat_utilities, dict_utilities, text_utilities
+from . import TsvReader, functional_enrichment
+from . import parse_umls, parse_msigdb 
+from . import parse_uniprot, parse_ncbi
+from . import parse_do, parse_medic, parse_disgenet
+from . import parse_drugbank, parse_medi, parse_hetionet
+import csv, numpy, os, pickle
 import random
 try:
-    from toolbox.external.diamond import diamond
+    from . import toolbox.external.diamond as diamond
 except:
     print("DIAMOnD not found and thus will not be available!")
 
@@ -183,7 +183,7 @@ def get_expression_info(gexp_file, process=None, delim=',', quote='"', R_header=
     process: a set(["log2", "z", "abs"]) or None
     """
     if dump_file is not None and os.path.exists(dump_file):
-        gexp, gene_to_idx, cell_line_to_idx = cPickle.load(open(dump_file))
+        gexp, gene_to_idx, cell_line_to_idx = pickle.load(open(dump_file))
         return gexp, gene_to_idx, cell_line_to_idx
     #gene_to_values = {}
     f = open(gexp_file)
@@ -217,7 +217,7 @@ def get_expression_info(gexp_file, process=None, delim=',', quote='"', R_header=
         #return gene_to_values, cell_line_to_idx
     if dump_file is not None:
         values = gexp, gene_to_idx, cell_line_to_idx
-        cPickle.dump(values, open(dump_file, 'w')) 
+        pickle.dump(values, open(dump_file, 'w')) 
     return gexp, gene_to_idx, cell_line_to_idx
 
 
@@ -450,18 +450,18 @@ def get_symptom_info(symptom_file, tfidf_cutoff=None):
 def get_drugbank(drugbank_file):
     dump_file = drugbank_file + ".pcl"
     if os.path.exists(dump_file):
-        parser = cPickle.load(open(dump_file))
+        parser = pickle.load(open(dump_file))
     else:
         parser = parse_drugbank.DrugBankXMLParser(drugbank_file)
         parser.parse()
-        cPickle.dump(parser, open(dump_file, 'w'))
+        pickle.dump(parser, open(dump_file, 'w'))
     return parser
 
 
 def get_medi_indications(medi_file, drugbank_file, mesh_dump, disease_ontology_file, only_hps=True):
     dump_file = medi_file + ".pcl"
     if os.path.exists(dump_file):
-        drug_to_diseases = cPickle.load(open(dump_file))
+        drug_to_diseases = pickle.load(open(dump_file))
         return drug_to_diseases 
     parser = get_drugbank(drugbank_file)
     name_to_drug, synonym_to_drug = parser.get_synonyms(selected_drugs=None, only_synonyms=False)
@@ -486,14 +486,14 @@ def get_medi_indications(medi_file, drugbank_file, mesh_dump, disease_ontology_f
     # Get disease to name mapping
     #phenotype_to_mesh_id = dict((name, mesh_id) for mesh_id, name in mesh_id_to_name.items())
     #disease_to_drugs = parse_medi.get_disease_specific_drugs(drug_to_diseases, phenotype_to_mesh_id)
-    cPickle.dump(drug_to_diseases, open(dump_file, 'w'))
+    pickle.dump(drug_to_diseases, open(dump_file, 'w'))
     return drug_to_diseases
 
 
 def get_hetionet_indications(hetionet_file, mesh_dump, disease_ontology_file):
     dump_file = hetionet_file + ".pcl"
     if os.path.exists(dump_file):
-        drug_to_diseases = cPickle.load(open(dump_file))
+        drug_to_diseases = pickle.load(open(dump_file))
         return drug_to_diseases 
     drug_to_do_ids = parse_hetionet.get_hetionet_mapping(hetionet_file, metaedge="CtD")
     do_to_mesh_ids = get_do_to_mesh_ids(disease_ontology_file)
@@ -503,7 +503,7 @@ def get_hetionet_indications(hetionet_file, mesh_dump, disease_ontology_file):
     for drug, values in drug_to_indications.items():
         for phenotype, dui, val in values:
             drug_to_diseases.setdefault(drug, set()).add(phenotype)
-    cPickle.dump(drug_to_diseases, open(dump_file, 'w'))
+    pickle.dump(drug_to_diseases, open(dump_file, 'w'))
     return drug_to_diseases 
 
 

@@ -1,8 +1,8 @@
 
-import network_utilities
-import file_converter
-import stat_utilities
-import selection_utilities
+from . import network_utilities
+from . import file_converter
+from . import stat_utilities
+from . import selection_utilities
 import os
 
 def main():

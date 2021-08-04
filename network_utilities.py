@@ -29,7 +29,7 @@
 #########################################################################
 
 import networkx, random, copy
-import os, cPickle, numpy
+import os, pickle, numpy
 
 try:
     from scipy.stats import rankdata
@@ -37,7 +37,9 @@ except:
     print("scipy is not installed, rank-based distance methods wont work")
 
 try:
-    from external.genrev import NWSteiner, Heuristic, kWalk
+    from . import external.genrev.NWSteiner as NWSteiner
+    from . import external.genrev.Heuristic as Heuristic
+    from . import external.genrev.kWalk as kWalk
 except:
     print("GenRev not found, steiner wont work")
 
@@ -84,7 +86,7 @@ def create_random_graphs(G, n_random, randomization_type, allow_self_edges, out_
         else:
             g = randomize_graph(G, randomization_type, allow_self_edges)
         dump_file = "{}_{}.pcl".format(out_prefix, i)
-        cPickle.dump(g, open(dump_file, 'w'))
+        pickle.dump(g, open(dump_file, 'w'))
         dump_file = "{}_sp_{}.pcl".format(out_prefix, i)
         sp = get_shortest_path_lengths(g, dump_file)
     return
@@ -92,9 +94,9 @@ def create_random_graphs(G, n_random, randomization_type, allow_self_edges, out_
 def get_random_graphs(n_random, out_prefix):
     for i in range(n_random):
         dump_file = "{}_{}.pcl".format(out_prefix, i)
-        g = cPickle.load(open(dump_file))
+        g = pickle.load(open(dump_file))
         dump_file = "{}_sp_{}.pcl".format(out_prefix, i)
-        sp = cPickle.load(open(dump_file))
+        sp = pickle.load(open(dump_file))
         yield i, g, sp
 
 def get_number_of_distinct_edges(G):
@@ -129,13 +131,13 @@ def dumper(func):
         #print(args_mod, kwargs_mod)
         if dump_file is not None:
             if os.path.exists(dump_file):
-               val = cPickle.load(open(dump_file)) 
+               val = pickle.load(open(dump_file)) 
                #print("loading", dump_file)
             else:
                 # remove dump_file argument
                 #print("dumping", dump_file, kwargs_mod)
                 val = func(*args_mod, **kwargs_mod)
-                cPickle.dump(val, open(dump_file, 'w'))
+                pickle.dump(val, open(dump_file, 'w'))
         else:
             #print("running", kwargs_mod)
             val = func(*args_mod, **kwargs_mod)
@@ -152,10 +154,10 @@ def get_shortest_paths(G, dump_file):
     return networkx.shortest_path(G)
     #if dump_file is not None:
     #        if os.path.exists(dump_file):
-    #           sp = cPickle.load(open(dump_file)) 
+    #           sp = pickle.load(open(dump_file)) 
     #        else:
     #            sp = networkx.shortest_path(G)
-    #            cPickle.dump(sp, open(dump_file, 'w'))
+    #            pickle.dump(sp, open(dump_file, 'w'))
     #else:
     #        sp = networkx.shortest_path(G)
     #return sp

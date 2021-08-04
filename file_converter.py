@@ -1,5 +1,5 @@
-import network_utilities
-import TsvReader
+from . import network_utilities
+from . import TsvReader
 
 def main():
     input_file = "test.txt"

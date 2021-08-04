@@ -1,7 +1,7 @@
 
-from FormattedFileProcessor import FormattedFileProcessor
+from . import FormattedFileProcessor as FFP
 
-class TsvReader(FormattedFileProcessor):
+class TsvReader(FFP.FormattedFileProcessor):
     """
         Read/process TSV (tab seperated) formatted files
     """

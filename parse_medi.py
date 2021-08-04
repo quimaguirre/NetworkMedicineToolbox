@@ -1,4 +1,5 @@
-import os, cPickle, parse_drugbank
+import os, pickle
+from . import parse_drugbank
 
 
 def main():
@@ -7,7 +8,7 @@ def main():
     mapping_file = "/home/emre/data/indication/medi/MEDI_01212013.csv" 
     #name_to_cui_and_confidences = get_medi_mapping_old(mapping_file)
     name_to_icd_and_confidences = get_medi_mapping(mapping_file)
-    print name_to_icd_and_confidences[name]
+    print(name_to_icd_and_confidences[name])
     return 
 
 
@@ -16,7 +17,7 @@ def get_disease_specific_drugs(drug_to_diseases, phenotype_to_mesh_id, cutoff=1)
     mesh_id_to_phenotype = {}
     for phenotype, mesh_id in phenotype_to_mesh_id.items():
         mesh_id_to_phenotype[mesh_id] = phenotype
-    for drugbank_id, diseases in drug_to_diseases.iteritems():
+    for drugbank_id, diseases in drug_to_diseases.items():
         for phenotype, dui, val in diseases:
             if val >= cutoff:
                 if dui in mesh_id_to_phenotype: # In the disease data set
@@ -33,35 +34,35 @@ def get_drug_disease_mapping(name_to_icd_and_confidences, name_to_drug, synonym_
     mesh_id_to_name mapping from UMLS (MSH | MH)
     """
     if dump_file is not None and os.path.exists(dump_file):
-	drug_to_diseases = cPickle.load(open(dump_file))
-	return drug_to_diseases 
+        drug_to_diseases = pickle.load(open(dump_file))
+        return drug_to_diseases 
     drug_to_diseases = {} # (mesh_term, mesh_id, association score) 
-    for name, values in name_to_icd_and_confidences.iteritems():
-	#if name != "Acarbose":
-	#    continue
+    for name, values in name_to_icd_and_confidences.items():
+        #if name != "Acarbose":
+        #    continue
         # Get drugbank id from name in the label
-	drugbank_id, drugbank_name = parse_drugbank.get_drugbank_id_from_name(name, name_to_drug, synonym_to_drug)
+        drugbank_id, drugbank_name = parse_drugbank.get_drugbank_id_from_name(name, name_to_drug, synonym_to_drug)
         if drugbank_id is None:
             continue
-	#if drugbank_id != "DB00284":
-	#    continue
-	#print "%s\t%s\t%s" % (drugbank_name, drugbank_id, name)
+        #if drugbank_id != "DB00284":
+        #    continue
+        #print("{}\t{}\t{}".format(drugbank_name, drugbank_id, name))
         for icd, val in values:
-	    icd = icd.split(".")[0]
-	    #print icd, val, icd in icd_to_mesh_ids 
+            icd = icd.split(".")[0]
+            #print(icd, val, icd in icd_to_mesh_ids)
             if icd in icd_to_mesh_ids:
                 dui_list = icd_to_mesh_ids[icd]
-		#print dui_list
-		for dui in dui_list:
-		    if dui not in mesh_id_to_name:
-			continue
-		    phenotype = mesh_id_to_name[dui].lower()
-		    #print dui, phenotype
-		    drug_to_diseases.setdefault(drugbank_id, set()).add((phenotype, dui, val))
-	    #else:
-		# ICD9 ids are problematic - consider name matching
+                #print(dui_list)
+                for dui in dui_list:
+                    if dui not in mesh_id_to_name:
+                        continue
+                    phenotype = mesh_id_to_name[dui].lower()
+                    #print(dui, phenotype)
+                    drug_to_diseases.setdefault(drugbank_id, set()).add((phenotype, dui, val))
+            #else:
+                # ICD9 ids are problematic - consider name matching
     if dump_file is not None:
-	cPickle.dump(drug_to_diseases, open(dump_file, 'w'))
+        pickle.dump(drug_to_diseases, open(dump_file, 'w'))
     return drug_to_diseases
 
 
@@ -72,23 +73,23 @@ def get_drug_disease_mapping_from_cui(name_to_cui_and_confidences, name_to_drug,
     concept & mesh_id mapping from UMLS (MSH | MH)
     """
     if dump_file is not None and os.path.exists(dump_file):
-	drug_to_diseases = cPickle.load(open(dump_file))
-	return drug_to_diseases 
+        drug_to_diseases = pickle.load(open(dump_file))
+        return drug_to_diseases 
     drug_to_diseases = {} # (mesh_term, mesh_id, association score) 
-    for name, values in name_to_cui_and_confidences.iteritems():
+    for name, values in name_to_cui_and_confidences.items():
         # Get drugbank id from name in the label
-	drugbank_id, drugbank_name = parse_drugbank.get_drugbank_id_from_name(name, name_to_drug, synonym_to_drug)
+        drugbank_id, drugbank_name = parse_drugbank.get_drugbank_id_from_name(name, name_to_drug, synonym_to_drug)
         if drugbank_id is None:
             continue
-	print "%s\t%s\t%s" % (drugbank_name, drugbank_id, name)
+        print("{}\t{}\t{}".format(drugbank_name, drugbank_id, name))
         for cui, val in values:
-	    #print cui, val, cui in concept_id_to_mesh_id 
+            #print(cui, val, cui in concept_id_to_mesh_id )
             if cui in concept_id_to_mesh_id:
                 dui = concept_id_to_mesh_id[cui]
                 phenotype = mesh_id_to_name[dui]
                 drug_to_diseases.setdefault(drugbank_id, set()).add((phenotype, dui, val))
     if dump_file is not None:
-	cPickle.dump(drug_to_diseases, open(dump_file, 'w'))
+        pickle.dump(drug_to_diseases, open(dump_file, 'w'))
     return drug_to_diseases
 
 
@@ -104,8 +105,8 @@ def get_medi_mapping(mapping_file, textual_indication=False):
         words = line.strip().split(",")
         name = words[1]
         icd = words[2]
-	if textual_indication:
-	    icd = words[3]
+        if textual_indication:
+            icd = words[3]
         in_hps = words[5]
         confidence = 0.5
         if in_hps == "1":
@@ -148,8 +149,8 @@ def get_medi_mapping_old(mapping_file, textual_indication=False):
         words = line.strip().split(",")
         name = words[1]
         cui = words[2]
-	if textual_indication:
-	    cui = words[3]
+        if textual_indication:
+            cui = words[3]
         in_hps = words[6]
         confidence = 0.5
         if in_hps == "1":
@@ -158,7 +159,7 @@ def get_medi_mapping_old(mapping_file, textual_indication=False):
     f.close()
     return name_to_cui_and_confidences
     
-	
+        
 if __name__ == "__main__":
     main()
 

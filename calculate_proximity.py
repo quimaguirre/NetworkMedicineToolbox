@@ -1,5 +1,5 @@
 import argparse, os
-import network_utilities, wrappers
+from . import network_utilities, wrappers
 
 def main():                         
     parser = argparse.ArgumentParser()

@@ -1,5 +1,5 @@
 
-import TsvReader
+from . import TsvReader
 
 def main():
     return

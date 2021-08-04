@@ -5,7 +5,7 @@
 ##############################################################################
 
 from xml.etree.ElementTree import iterparse
-import os, cPickle
+import os, pickle
 import re, math
 
 def main():
@@ -303,11 +303,11 @@ class DrugBankXMLParser(object):
 def output_data(file_name, out_file):
     dump_file = file_name + ".pcl"
     if os.path.exists(dump_file):
-        parser = cPickle.load(open(dump_file))
+        parser = pickle.load(open(dump_file))
     else:
         parser = DrugBankXMLParser(file_name)
         parser.parse()
-        cPickle.dump(parser, open(dump_file, 'w'))
+        pickle.dump(parser, open(dump_file, 'w'))
     #target_type_list = ["target", "enzyme", "carrier", "transporter"]
     #for target_type in target_type_list:
     target_type_list = ["target"]

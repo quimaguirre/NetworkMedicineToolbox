@@ -21,7 +21,7 @@ def get_geneid_symbol_mapping(file_name):
         if len(words) == 2:
             geneid, symbol = words
         else:
-            geneid, symbol, alternatives = words[:3]
+            tax_id, geneid, symbol, locus, alternatives = words[:5]
             alternatives = alternatives.split("|")
         geneid = geneid.strip() # strip in case mal formatted input file
         symbol = symbol.strip()

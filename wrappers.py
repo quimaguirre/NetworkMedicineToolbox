@@ -12,7 +12,7 @@ from . import parse_drugbank, parse_medi, parse_hetionet
 import csv, numpy, os, pickle
 import random
 try:
-    from . import toolbox.external.diamond as diamond
+    from external.diamond import diamond
 except:
     print("DIAMOnD not found and thus will not be available!")
 

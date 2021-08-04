@@ -37,9 +37,7 @@ except:
     print("scipy is not installed, rank-based distance methods wont work")
 
 try:
-    from . import external.genrev.NWSteiner as NWSteiner
-    from . import external.genrev.Heuristic as Heuristic
-    from . import external.genrev.kWalk as kWalk
+    from external.genrev import NWSteiner, Heuristic, kWalk
 except:
     print("GenRev not found, steiner wont work")
 

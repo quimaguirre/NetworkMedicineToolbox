@@ -136,12 +136,12 @@ def create_association_file(all_geneids, type_function, taxID, output_file, func
     evidence_codes_reactome = ['IEA', 'TAS']
     evidence_codes_go = ['EXP', 'IDA', 'IMP', 'IGI', 'IEP', 'ISS', 'ISA', 'ISM', 'ISO']
     if type_function.lower() == 'reactome':
-        reactome_file = os.path.join(reactome_dir, 'NCBI2Reactome.txt')
+        reactome_file = os.path.join(functions_data_dir, 'NCBI2Reactome.txt')
         term2genes, term2name = parse_reactome(reactome_file, evidence_codes_reactome, taxID)
     elif type_function.lower() == 'gobp':
-        term2genes, term2name = parse_gene2go(go_dir, 'Process', evidence_codes_go, taxID)
+        term2genes, term2name = parse_gene2go(functions_data_dir, 'Process', evidence_codes_go, taxID)
     elif type_function.lower() == 'gomf':
-        term2genes, term2name = parse_gene2go(go_dir, 'Function', evidence_codes_go, taxID)
+        term2genes, term2name = parse_gene2go(functions_data_dir, 'Function', evidence_codes_go, taxID)
     else:
         print('Incorrect type of function introduced: {}'.format(type_function))
         sys.exit(10)

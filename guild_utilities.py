@@ -8,8 +8,8 @@ import os
 def main():
     network_file = "interactions.sif"
     seed_file = "seeds.txt"
-    scoring_folder = "./test/"
-    random_networks_folder = "./test/"
+    scoring_folder = "./test"
+    random_networks_folder = "./test"
     executable_path = "/home/emre/arastirma/netzcore/src/scoreNetwork/scoreN"
     # Create input files for scoring
     prepare_scoring(network_file, seed_file, scoring_folder, random_networks_folder, non_seed_score=0.01, seed_score=1.0, edge_score=1.0, n_sample=100, delim=" ")
@@ -37,7 +37,7 @@ def main():
     return
 
 
-def prepare_scoring(network_file, seed_file, scoring_folder="./", random_networks_folder="./", non_seed_score=0.01, seed_score=1.0, edge_score=1.0, n_sample=100, delim=" ", name=None):
+def prepare_scoring(network_file, seed_file, scoring_folder=".", random_networks_folder=".", non_seed_score=0.01, seed_score=1.0, edge_score=1.0, n_sample=100, delim=" ", name=None):
     """
         Creates input files required by GUILD executable.
 
@@ -93,7 +93,7 @@ def prepare_scoring(network_file, seed_file, scoring_folder="./", random_network
 
     # Create random network files for netzcore
     print("Creating random networks (for netzcore)")
-    sampling_prefix = random_networks_folder + "sampled_graph."
+    sampling_prefix = os.path.join(random_networks_folder, "sampled_graph.")
     if os.path.exists(sampling_prefix+"{}".format(n_sample)):
         print("\tSampled networks exists, skipping this step!")
     else:
@@ -208,15 +208,15 @@ def run_scoring(scoring_folder, random_networks_folder, executable_path, scoring
     else:
         name = ""
 
-    edge_file = scoring_folder + "edge_scores.sif" 
-    node_file = scoring_folder + name + "node_scores.sif" 
-    seed_file = scoring_folder + name + "seed_scores.sif" 
-    bg_node_file = scoring_folder + name + "node_scores_background.sif" 
-    bg_seed_file = scoring_folder + name + "seed_scores_background.sif" 
-    nd_edge_file = scoring_folder + name + "edge_scores_netshort.sif"
-    sampling_prefix = random_networks_folder + "sampled_graph."
-    output_file = scoring_folder + name + "output_scores.sif"
-    bg_output_file = scoring_folder + name + "output_scores_background.sif"
+    edge_file = os.path.join(scoring_folder, "edge_scores.sif")
+    node_file = os.path.join(scoring_folder, name + "node_scores.sif")
+    seed_file = os.path.join(scoring_folder, name + "seed_scores.sif")
+    bg_node_file = os.path.join(scoring_folder, name + "node_scores_background.sif")
+    bg_seed_file = os.path.join(scoring_folder, name + "seed_scores_background.sif")
+    nd_edge_file = os.path.join(scoring_folder, name + "edge_scores_netshort.sif")
+    sampling_prefix = os.path.join(random_networks_folder, "sampled_graph.")
+    output_file = os.path.join(scoring_folder, name + "output_scores.sif")
+    bg_output_file = os.path.join(scoring_folder, name + "output_scores_background.sif")
     if not os.path.exists(node_file) or not os.path.exists(edge_file):
         print("Input files not found!\nMake sure that you have run prepare_scoring first and that you provide the correct path.")
         return

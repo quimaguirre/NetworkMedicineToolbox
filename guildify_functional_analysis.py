@@ -133,8 +133,6 @@ def create_association_file(all_geneids, type_function, taxID, output_file, func
     """
 
     # Parse the raw association files
-    go_dir = os.path.join(functions_data_dir, 'GO')
-    reactome_dir = os.path.join(functions_data_dir, 'Reactome')
     evidence_codes_reactome = ['IEA', 'TAS']
     evidence_codes_go = ['EXP', 'IDA', 'IMP', 'IGI', 'IEP', 'ISS', 'ISA', 'ISM', 'ISO']
     if type_function.lower() == 'reactome':

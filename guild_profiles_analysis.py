@@ -4,8 +4,6 @@ import numpy as np
 import scipy.stats
 import os, sys
 
-import diana.classes.network_translation as NT
-import diana.classes.tissue_specificity as TS
 import diana.classes.top_scoring as TOP
 
 """
@@ -277,39 +275,6 @@ class Network(object):
         return EdgeProfile(network_file=output_file, type_id=self.type_id, network_format=self.network_format, top=100)
 
 
-    def filter_network_by_tissue(self, filtered_network_file, filtered_nodes_file, tissue_object, permission, verbose=False):
-        """
-        Filter the network using only interactions where the proteins are 
-        present in a Tissue object
-
-        @param:    filtered_network_file
-        @pdef:     File where the tissue-specific network will be written
-        @ptype:    String
-
-        @param:    filtered_nodes_file
-        @pdef:     File where the nodes file will be written
-        @ptype:    String
-
-        @param:    tissue_object
-        @pdef:     Tissue class object used to filter the network
-        @ptype:    Tissue class object
-
-        @param:    permission
-        @pdef:     Level of permission to create the network
-        @ptype:    Integer {0,1,2}
-        """
-
-        if verbose:
-            print('Filtering network by tissue...\n')
-
-        TS.filter_network_tissue_specific(self.network_file, tissue_object, permission, filtered_network_file, filtered_nodes_file)
-
-        if verbose:
-            print('Filtering network by tissue... finished!\n')
-
-        return TissueSpecificNetwork(filtered_network_file, filtered_nodes_file, self.type_id, self.network_format, tissue_object, permission)
-
-
     def filter_network_by_method(self, methods_excluded=None, method_ids_excluded=None, methods_included=None, method_ids_included=None, output_network_file=None, output_nodes_file=None, verbose=False):
         """
         Filter the network: 
@@ -507,106 +472,6 @@ class Network(object):
         """
         housekeeping_genes = set([ str(x) for x in housekeeping_genes ])
         return len( set(self.network.nodes()) & housekeeping_genes )
-
-
-class TissueSpecificNetwork(Network):
-    """ 
-    Child class of Network defining a tissue-specific network object 
-    """
-
-    def __init__(self, network_file, type_id, network_format, tissue_object, permission):
-        """ 
-        @param:    network_file
-        @pdef:     Path to the file containing the edges of the network
-        @ptype:    {String}
-
-        @param:    type_id
-        @pdef:     Type of IDs in the network
-        @ptype:    {String}
-
-        @param:    network_format
-        @pdef:     Format of the network
-        @ptype:    {String} {'sif' or 'multi-fields'}
-
-        @param:    tissue_object
-        @pdef:     Instance from Tissue Class associated to the Network
-        @ptype:    {String}
-
-        @param:    permission
-        @pdef:     Level of permissivity of the network filtering
-        @ptype:    {String}
-
-        @raises: {IncorrectNetworkFormat} if the network_format is not in
-        self.formats.
-        @raises: {IncorrectTypeID} if the method translate_network is used with
-        a network of type_id different from 'biana'
-        """
-
-        #super(TissueSpecificNetwork, self).__init__(network_file, type_id, network_format)
-
-        self.network_file = network_file
-        self.type_id = type_id
-        self.network_format = network_format
-        self.formats = ['sif', 'multi-fields']
-        self.pickles_path = '/home/quim/project/tissue_specificity/scripts/pickles'
-
-        self.tissue_object = tissue_object
-        self.permission = permission
-
-        self._tissue_specific = True 
-
-        self.network = self.parse_network(tissue_specific=self._tissue_specific)
-
-        self.hpa_edges = self.get_hpa_edges()
-        self.jensen_edges = self.get_jensen_edges()
-
-    ###########
-    # METHODS #
-    ###########
-
-    def get_hpa_edges(self):
-        """
-        Obtain the edges in the tissue-specific network according to Human
-        Protein Atlas 
-        """
-        hpa=nx.Graph()
-        for u,v,d in self.network.edges_iter(data=True):
-            if 'hpa' in d['tissue_db']:
-                hpa.add_edge(u,v,d)
-        return hpa.edges()
-
-    def get_jensen_edges(self):
-        """
-        Obtain the edges in the tissue-specific network according to Tissues
-        (Jensen Lab)
-        """
-        jensen=nx.Graph()
-        for u,v,d in self.network.edges_iter(data=True):
-            if 'jensen' in d['tissue_db']:
-                jensen.add_edge(u,v,d)
-        return jensen.edges()
-
-    def get_union(self):
-        """
-        Obtain the common tissue-specific interactions between Human Protein
-        Atlas and Tissues (Jensen Lab)
-        """
-        union=nx.Graph()
-        for u,v,d in self.network.edges_iter(data=True):
-            if 'jensen' in d['tissue_db'] or 'hpa' in d['tissue_db']:
-                union.add_edge(u,v,d)
-        return union.edges()
-
-    def get_intersection(self):
-        """
-        Obtain the tissue-specific interactions in Human Protein Atlas, Tissues
-        (Jensen Lab) or both
-        """
-        intersection=nx.Graph()
-        for u,v,d in self.network.edges_iter(data=True):
-            if 'jensen' in d['tissue_db'] and 'hpa' in d['tissue_db']:
-                intersection.add_edge(u,v,d)
-        return intersection.edges()
 
 
 class GUILDProfile(object):

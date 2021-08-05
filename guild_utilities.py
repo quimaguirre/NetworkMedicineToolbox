@@ -17,8 +17,8 @@ def main():
     run_scoring(scoring_folder, random_networks_folder, executable_path, scoring_type="netcombo")
     #run_scoring(scoring_folder, executable_path, scoring_type="netzcore", parameters={"n_iteration":5, "n_sample":100, "sampling_prefix":scoring_folder+"sampled_graph."}, qname=None)
     # Generate cross validation files
-    node_scores_file = scoring_folder + "node_scores.sif"
-    edge_scores_file = scoring_folder + "edge_scores_netshort.sif"
+    node_scores_file = os.path.join(scoring_folder, "node_scores.sif")
+    edge_scores_file = os.path.join(scoring_folder, "edge_scores_netshort.sif")
 
     # fill the code to get nodes, seed_to_score, edges and edge_to_score variables below
     g = network_utilities.create_network_from_sif_file(network_file, use_edge_data=True)
@@ -63,7 +63,7 @@ def prepare_scoring(network_file, seed_file, scoring_folder=".", random_networks
 
     # Read node info from network file (use network file as edge file)
     print("Creating edge score file")
-    edge_score_file = scoring_folder + "edge_scores.sif" #network_file.split("/")[-1] + ".converted"
+    edge_score_file = os.path.join(scoring_folder, "edge_scores.sif") #network_file.split("/")[-1] + ".converted"
     if fileExist(edge_score_file):
         print("\tEdge score file exists, overwriting!")
     nodes, edges, dummy, edge_to_data = network_utilities.get_nodes_and_edges_from_sif_file(network_file, store_edge_type = True, delim = delim, data_to_float=False)
@@ -71,8 +71,8 @@ def prepare_scoring(network_file, seed_file, scoring_folder=".", random_networks
 
     # Create node file (ignore seeds that are not in the network and assign non-seed scores)
     print("Creating node score file")
-    node_score_file = scoring_folder + name + "node_scores.sif" #seed_file.split("/")[-1] + ".converted"
-    seed_score_file = scoring_folder + name + "seed_scores.sif"
+    node_score_file = os.path.join(scoring_folder, name + "node_scores.sif") #seed_file.split("/")[-1] + ".converted"
+    seed_score_file = os.path.join(scoring_folder, name + "seed_scores.sif")
     seeds, dummy, seed_to_data, dummy = network_utilities.get_nodes_and_edges_from_sif_file(seed_file, store_edge_type = False, delim = delim, data_to_float=True)
     if seed_to_data is None:
         seed_to_data = {}
@@ -82,13 +82,13 @@ def prepare_scoring(network_file, seed_file, scoring_folder=".", random_networks
 
     # Create background node file (selects k non-seeds randomly where k is the number of seeds)
     print("Creating background node score file")
-    bg_node_file = scoring_folder + name + "node_scores_background.sif" #seed_file.split("/")[-1] + ".converted"
-    bg_seed_file = scoring_folder + name + "seed_scores_background.sif" 
+    bg_node_file = os.path.join(scoring_folder, name + "node_scores_background.sif") #seed_file.split("/")[-1] + ".converted"
+    bg_seed_file = os.path.join(scoring_folder, name + "seed_scores_background.sif")
     create_background_score_file(bg_node_file, bg_seed_file, nodes, seeds, seed_to_data, non_seed_score, delim)
 
     # Create modified edge file using node scores for netshort
     print("Creating node score converted edge file (for netshort)")
-    nd_edge_file = scoring_folder + name + "edge_scores_netshort.sif" #network_file.split("/")[-1] + ".converted_for_netshort"
+    nd_edge_file = os.path.join(scoring_folder, name + "edge_scores_netshort.sif") #network_file.split("/")[-1] + ".converted_for_netshort"
     create_node_score_converted_edge_score_file(nd_edge_file, edges, edge_to_weight, node_to_data, delim)
 
     # Create random network files for netzcore

@@ -4,6 +4,7 @@ import numpy as np
 import scipy.stats
 import os, sys
 from . import network_utilities
+from . import guildify_functional_analysis
 
 """
     NetworkAnalysis
@@ -269,7 +270,7 @@ class Network(object):
         if self.network_format != 'sif':
             raise IncorrectNetworkFormat(self.network_format)
 
-        TOP.score_network(self.network, node_to_score, output_file)
+        score_network(self.network, node_to_score, output_file)
 
         return EdgeProfile(network_file=output_file, type_id=self.type_id, network_format=self.network_format, top=100)
 
@@ -504,7 +505,7 @@ class GUILDProfile(object):
         self.top = float(top)
         self.possible_threshold_types = ['percentage', 'number_of_nodes']
         if top_type not in self.possible_threshold_types:
-            raise TOP.IncorrectThresholdType(wrong_top_type=top_type, top_types=self.possible_threshold_types)
+            raise IncorrectThresholdType(wrong_top_type=top_type, top_types=self.possible_threshold_types)
         self.top_type = top_type
         self.node_to_score = self.parse_scores_file()
 
@@ -533,7 +534,7 @@ class GUILDProfile(object):
         to select the top scoring nodes. Returns a new GUILDProfile containing the
         selected nodes.
         """
-        TOP.node_top_scoring(self.node_to_score, threshold, threshold_type, output_file)
+        node_top_scoring(self.node_to_score, threshold, threshold_type, output_file)
 
         return GUILDProfile(output_file, self.type_id, threshold, threshold_type)
 
@@ -544,7 +545,7 @@ class GUILDProfile(object):
         creating a functional profile.
         It requires all the nodes of the network as well, which will be used as background genes.
         """
-        TOP.functional_top_scoring(top_geneids=self.node_to_score.keys(), type_correction=type_correction, output_file=output_file, associations_file=associations_file)
+        functional_top_scoring(top_geneids=self.node_to_score.keys(), type_correction=type_correction, output_file=output_file, associations_file=associations_file)
 
         return FunctionalProfile(output_file, self.top, self.scores_file)
 
@@ -593,7 +594,7 @@ class EdgeProfile(Network):
         self.top = float(top)
         self.possible_threshold_types = ['percentage', 'number_of_nodes']
         if top_type not in self.possible_threshold_types:
-            raise TOP.IncorrectThresholdType(wrong_top_type=top_type, top_types=self.possible_threshold_types)
+            raise IncorrectThresholdType(wrong_top_type=top_type, top_types=self.possible_threshold_types)
         self.top_type = top_type
 
         self._tissue_specific = False
@@ -628,7 +629,7 @@ class EdgeProfile(Network):
         Scores the edges calculating the mean of the nodes.
         Returns a new EdgeProfile with the most relevant edges.
         """
-        TOP.edge_top_scoring(self.network_file, node_to_score, threshold, threshold_type, output_file)
+        edge_top_scoring(self.network_file, node_to_score, threshold, threshold_type, output_file)
 
         return EdgeProfile(network_file=output_file, type_id=self.type_id, network_format=self.network_format, top=threshold, top_type=threshold_type)
 
@@ -979,7 +980,7 @@ def node_top_scoring(node_to_score, threshold, threshold_type, output_file, verb
         # By exact number of nodes
         ntop=int(threshold)
     else:
-        raise TOP.IncorrectThresholdType(wrong_top_type=threshold_type, top_types=['percentage', 'number_of_nodes'])
+        raise IncorrectThresholdType(wrong_top_type=threshold_type, top_types=['percentage', 'number_of_nodes'])
 
     # Now, write the profile with the top scoring nodes
     top_nodes = set()
@@ -1029,7 +1030,7 @@ def edge_top_scoring(network_file, node_to_score, threshold, threshold_type, out
         # By exact number of nodes
         ntop=int(threshold)
     else:
-        raise TOP.IncorrectThresholdType(wrong_top_type=threshold_type, top_types=['percentage', 'number_of_nodes'])
+        raise IncorrectThresholdType(wrong_top_type=threshold_type, top_types=['percentage', 'number_of_nodes'])
 
     top_nodes = set()
     ii=0
@@ -1075,7 +1076,7 @@ def functional_top_scoring(top_geneids, type_correction, associations_file, outp
         @output_file:           Resulting file which will contain the functions enriched.
         @associations_file:     File containing the function-gene associations
     """
-    FA.calculate_functional_enrichment_profile(top_geneids=top_geneids, type_correction=type_correction, associations_file=associations_file, output_file=output_file)
+    guildify_functional_analysis.calculate_functional_enrichment_profile(top_geneids=top_geneids, type_correction=type_correction, associations_file=associations_file, output_file=output_file)
     if verbose:
         print('INFO:\t{} file created.\n'.format(output_file))
     return

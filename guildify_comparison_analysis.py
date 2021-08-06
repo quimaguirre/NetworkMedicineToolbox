@@ -332,6 +332,8 @@ def calculate_jaccard_index(set1, set2):
     """
     Calculates the Jaccard index of two sets
     """
+    if len(set1) == 0 and len(set2) == 0:
+        return 0
     size_intersection = float(len(set1.intersection(set2)))
     size_union = float(len(set1.union(set2)))
     return size_intersection / size_union

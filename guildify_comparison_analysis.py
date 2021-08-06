@@ -338,7 +338,7 @@ def calculate_jaccard_index(set1, set2):
         jaccard = 0
     else:
         jaccard = size_intersection / size_union
-    return
+    return jaccard
 
 def calculate_simpson_index(set1, set2):
     """

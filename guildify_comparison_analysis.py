@@ -334,10 +334,8 @@ def calculate_jaccard_index(set1, set2):
     """
     size_intersection = float(len(set1.intersection(set2)))
     size_union = float(len(set1.union(set2)))
-    jaccard = None
-    if size_union > 0:
-        jaccard = size_intersection / size_union
-    return jaccard
+    return size_intersection / size_union
+
 
 def calculate_simpson_index(set1, set2):
     """

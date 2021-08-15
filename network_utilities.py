@@ -1002,7 +1002,7 @@ def get_degree_binning(g, bin_size, lengths=None):
         if lengths is not None and node not in lengths:
             continue
         degree_to_nodes.setdefault(degree, []).append(node)
-    values = degree_to_nodes.keys()
+    values = list(degree_to_nodes.keys())
     values.sort()
     bins = []
     i = 0

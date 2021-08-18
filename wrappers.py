@@ -549,11 +549,14 @@ def calculate_proximity(network, nodes_from, nodes_to, nodes_from_random=None, n
     nodes_network = set(network.nodes())
     nodes_from = set(nodes_from) & nodes_network 
     nodes_to = set(nodes_to) & nodes_network
+    #print('Lengths original sets: from {}, to {}'.format(len(nodes_from), len(nodes_to)))
     if len(nodes_from) == 0 or len(nodes_to) == 0:
         return None # At least one of the node group not in network
     d = calculate_closest_distance(network, nodes_from, nodes_to, lengths)
+    #print('Closest distance original sets: {}'.format(d))
     if bins is None and (nodes_from_random is None or nodes_to_random is None):
         bins = network_utilities.get_degree_binning(network, min_bin_size, lengths) # if lengths is given, it will only use those nodes
+    #print('Bins: {}'.format(len(bins)))
     if nodes_from_random is None:
         nodes_from_random = get_random_nodes(nodes_from, network, bins = bins, n_random = n_random, min_bin_size = min_bin_size, seed = seed)
     if nodes_to_random is None:
@@ -562,6 +565,7 @@ def calculate_proximity(network, nodes_from, nodes_to, nodes_from_random=None, n
     values = numpy.empty(len(nodes_from_random)) #n_random
     for i, values_random in enumerate(random_values_list):
         nodes_from, nodes_to = values_random
+        #print(len(nodes_from), len(nodes_to))
         #values[i] = network_utilities.get_separation(network, lengths, nodes_from, nodes_to, distance, parameters = {})
         values[i] = calculate_closest_distance(network, nodes_from, nodes_to, lengths)
     #pval = float(sum(values <= d)) / len(values) # needs high number of n_random

@@ -1060,7 +1060,7 @@ def pick_random_nodes_matching_selected(network, bins, nodes_selected, n_random,
                 for k in range(20): # Try to find a distinct node (at most 20 times)
                     if chosen in nodes_random:
                         chosen = random.choice(equivalent_nodes)
-                    nodes_random.add(chosen)
+                nodes_random.add(chosen)
             nodes_random = list(nodes_random)
         else:
             if connected:

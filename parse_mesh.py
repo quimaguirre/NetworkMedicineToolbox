@@ -37,7 +37,7 @@ class MESH(object):
     def get_concept(self, concept_id):
         return self.concept_id_to_concept[concept_id]
 
-    def get_ontology(self):
+    def get_ontology(self, lower_concepts=True):
         if self.ontology is not None:
             return self.ontology
         self.ontology = networkx.DiGraph()
@@ -48,6 +48,8 @@ class MESH(object):
         for line in f:
             words = line.strip("\n").split(self.delim)
             concept = words[0]
+            if lower_concepts:
+                concept = concept.lower()
             concept_id = words[1]
             self.concept_id_to_concept[concept_id] = concept
             self.concept_to_concept_ids.setdefault(concept, []).append(concept_id)

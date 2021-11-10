@@ -1169,7 +1169,7 @@ def get_connected_components(G, return_as_graph_list=True):
     result_list = []
 
     if return_as_graph_list:
-        result_list = networkx.connected_component_subgraphs(G)
+        result_list = [G.subgraph(c).copy() for c in sorted(networkx.connected_components(G), key=len, reverse=True)]
     else:
         result_list = [c for c in sorted(networkx.connected_components(G), key=len, reverse=True)]
 

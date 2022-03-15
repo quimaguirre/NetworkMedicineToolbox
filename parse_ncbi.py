@@ -285,7 +285,7 @@ def obtain_header_fields(first_line):
     fields_dict = {}
 
     header_fields = first_line.strip().split("\t")
-    for x in xrange(0, len(header_fields)):
+    for x in range(0, len(header_fields)):
         fields_dict[header_fields[x]] = x
 
     return fields_dict

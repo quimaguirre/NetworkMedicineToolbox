@@ -21,9 +21,9 @@ def get_geneid_symbol_mapping(file_name):
         if len(words) == 2:
             geneid, symbol = words
         else:
-            tax_id, geneid, symbol, locus, synonyms = words[:5]
+            taxid, geneid, symbol, locus, synonyms = words[:5]
             synonyms = synonyms.split("|")
-        #print(tax_id, geneid, symbol, locus, synonyms)
+        #print(taxid, geneid, symbol, locus, synonyms)
 
         # Insert TaxID. There can only be one taxID for GeneID. If not, error
         if geneid not in geneid_to_taxid:

@@ -2,6 +2,17 @@ import os, sys
 import gzip
 
 def main():
+    data_dir = "../../data/raw"
+    gene_info_file = os.path.join(data_dir, "Homo_sapiens.gene_info.gz")
+    gene2pubmed_file = os.path.join(data_dir, "gene2pubmed.gz")
+    gene2ensembl_file = os.path.join(data_dir, "gene2ensembl.gz")
+    gene2go_file = os.path.join(data_dir, "gene2go.gz")
+
+    geneid_to_name, name_to_geneid, geneid_to_synonyms, geneid_to_taxid = parse_ncbi.get_geneid_symbol_mapping(gene_info_file)
+    geneid_to_pubmeds = parse_ncbi.get_geneid_to_pubmeds(gene2pubmed_file)
+    geneid_to_ensembl, geneid_to_accession, geneid_to_taxid = get_geneid_to_ensembl(gene2ensembl_file)
+    geneid_to_go, geneid_to_go_to_evidences, geneid_to_go_to_pubmeds, geneid_to_taxid = get_geneid_to_go(gene2go_file)
+
     return
 
 def get_geneid_symbol_mapping(file_name):
@@ -17,7 +28,7 @@ def get_geneid_symbol_mapping(file_name):
     f = gzip.open(file_name,'rb')
     first_line = f.readline()
     for line in f:
-        words = (line.decode()).strip('\n').split('\t')
+        words = line.decode().strip('\n').split('\t')
         if len(words) == 2:
             geneid, symbol = words
         else:
@@ -63,7 +74,7 @@ def get_geneid_to_pubmeds(file_name, tax_id = "9606"):
     with open(file_name) as f:
         f.readline()
         for line in f:
-            tax, geneid, pubmed_id = line.strip().split("\t")
+            tax, geneid, pubmed_id = line.decode().strip().split("\t")
             if tax != tax_id:
                 continue
             geneid_to_pubmeds.setdefault(geneid, set()).add(pubmed_id)
@@ -75,14 +86,13 @@ def get_geneid_to_ensembl(file_name, id_type="geneid"):
     Parses gene2ensembl file from NCBI.
     The file can be downloaded at: https://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2ensembl.gz
     """
-    geneIDs = set()
-    geneid_to_taxid = {}
     geneid_to_ensembl = {}
     geneid_to_accession = {}
+    geneid_to_taxid = {}
 
     gene2ensembl_fd = gzip.open(gene2ensembl_file,'rb')
 
-    first_line = gene2ensembl_fd.readline()
+    first_line = gene2ensembl_fd.readline().decode()
 
     # Obtain a dictionary: "field_name" => "position"
     fields_dict = obtain_header_fields(first_line[1:])
@@ -91,7 +101,7 @@ def get_geneid_to_ensembl(file_name, id_type="geneid"):
     for line in gene2ensembl_fd:
 
         # Split the line in fields
-        fields = line.strip().split("\t")
+        fields = line.decode().strip().split("\t")
 
         # Obtain the fields of interest
         taxid = fields[ fields_dict['tax_id'] ]
@@ -101,9 +111,6 @@ def get_geneid_to_ensembl(file_name, id_type="geneid"):
         ensembl_rna = fields[ fields_dict['Ensembl_rna_identifier'] ]
         accession_prot = fields[ fields_dict['protein_accession.version'] ]
         ensembl_prot = fields[ fields_dict['Ensembl_protein_identifier'] ]
-
-        # Insert GeneID
-        geneIDs.add(geneid)
 
         # Insert TaxID. There can only be one taxID for GeneID. If not, error
         if geneid not in geneid_to_taxid:
@@ -141,7 +148,7 @@ def get_geneid_to_ensembl(file_name, id_type="geneid"):
 
     gene2ensembl_fd.close()
 
-    return ensembl_to_id
+    return geneid_to_ensembl, geneid_to_accession, geneid_to_taxid
 
 
 def get_geneid_to_go():
@@ -149,14 +156,13 @@ def get_geneid_to_go():
     Parses gene2go file from NCBI.
     The file can be downloaded at: https://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2go.gz
     """
-    geneIDs = set()
     geneid_to_go = {}
     geneid_to_go_to_evidences = {}
     geneid_to_go_to_pubmeds = {}
     geneid_to_taxid = {}
 
     gene2go_fd = gzip.open(gene2go_file,'rb')
-    first_line = gene2go_fd.readline()
+    first_line = gene2go_fd.readline().decode()
 
     # Obtain a dictionary: "field_name" => "position"
     fields_dict = obtain_header_fields(first_line[1:])
@@ -165,7 +171,7 @@ def get_geneid_to_go():
     for line in gene2go_fd:
 
         # Split the line in fields
-        fields = line.strip().split("\t")
+        fields = line.decode().strip().split("\t")
 
         # Obtain the fields of interest
         taxid = fields[ fields_dict['tax_id'] ]
@@ -176,9 +182,6 @@ def get_geneid_to_go():
         go_term = fields[ fields_dict['GO_term'] ].lower()
         pubmed = fields[ fields_dict['PubMed'] ]
         category = fields[ fields_dict['Category'] ].lower()
-
-        # Insert GeneID
-        geneIDs.add(geneid)
 
         # Insert TaxID. There can only be one taxID for GeneID. If not, error
         if geneid not in geneid_to_taxid:

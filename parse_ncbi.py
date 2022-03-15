@@ -90,7 +90,7 @@ def get_geneid_to_ensembl(file_name, id_type="geneid"):
     geneid_to_accession = {}
     geneid_to_taxid = {}
 
-    gene2ensembl_fd = gzip.open(gene2ensembl_file,'rb')
+    gene2ensembl_fd = gzip.open(file_name,'rb')
 
     first_line = gene2ensembl_fd.readline().decode()
 
@@ -151,7 +151,7 @@ def get_geneid_to_ensembl(file_name, id_type="geneid"):
     return geneid_to_ensembl, geneid_to_accession, geneid_to_taxid
 
 
-def get_geneid_to_go():
+def get_geneid_to_go(file_name):
     """
     Parses gene2go file from NCBI.
     The file can be downloaded at: https://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2go.gz
@@ -161,7 +161,7 @@ def get_geneid_to_go():
     geneid_to_go_to_pubmeds = {}
     geneid_to_taxid = {}
 
-    gene2go_fd = gzip.open(gene2go_file,'rb')
+    gene2go_fd = gzip.open(file_name,'rb')
     first_line = gene2go_fd.readline().decode()
 
     # Obtain a dictionary: "field_name" => "position"

@@ -8,7 +8,7 @@ def main():
     gene2ensembl_file = os.path.join(data_dir, "gene2ensembl.gz")
     gene2go_file = os.path.join(data_dir, "gene2go.gz")
 
-    geneid_to_name, name_to_geneid, geneid_to_synonyms, geneid_to_taxid = parse_ncbi.get_geneid_symbol_mapping(gene_info_file)
+    geneid_to_name, name_to_geneid, name_to_synonyms, geneid_to_synonyms, geneid_to_taxid = parse_ncbi.get_geneid_symbol_mapping(gene_info_file)
     geneid_to_pubmeds = parse_ncbi.get_geneid_to_pubmeds(gene2pubmed_file)
     geneid_to_ensembl, geneid_to_accession, _ = get_geneid_to_ensembl(gene2ensembl_file)
     geneid_to_go, geneid_to_go_to_evidences, geneid_to_go_to_pubmeds, _ = get_geneid_to_go(gene2go_file)
@@ -55,7 +55,7 @@ def get_geneid_symbol_mapping(file_name):
         for synonym in synonyms:
             geneid_to_synonyms.setdefault(geneid, set())
             geneid_to_synonyms[geneid].add(synonym)
-            name_to_synonyms.setdefault(symbol)
+            name_to_synonyms.setdefault(symbol, set())
             name_to_synonyms[symbol].add(synonym)
         
         for symbol in [symbol] + synonyms: # added for synonym parsing

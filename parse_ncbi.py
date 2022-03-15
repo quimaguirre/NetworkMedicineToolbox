@@ -12,6 +12,8 @@ def get_geneid_symbol_mapping(file_name):
     geneid_to_name = {} # now contains only the official symbol
     name_to_geneid = {}
     geneid_to_synonyms = {}
+    geneid_to_taxid = {}
+
     f = gzip.open(file_name,'rb')
     first_line = f.readline()
     for line in f:
@@ -22,21 +24,33 @@ def get_geneid_symbol_mapping(file_name):
             tax_id, geneid, symbol, locus, synonyms = words[:5]
             synonyms = synonyms.split("|")
         #print(tax_id, geneid, symbol, locus, synonyms)
+
+        # Insert TaxID. There can only be one taxID for GeneID. If not, error
+        if geneid not in geneid_to_taxid:
+            geneid_to_taxid[geneid] = taxid
+        else:
+            if geneid_to_taxid[geneid] != taxid:
+                print('Different taxIDs for the GeneID: {}\nFirst taxID: {}  Second taxID: {}'.format(geneid, geneid_to_taxid[geneid], taxid))
+                sys.exit(10)
+
         geneid = geneid.strip() # strip in case mal formatted input file
         symbol = symbol.strip()
         if geneid == "" or geneid == None or symbol == "" or symbol == None:
             continue
+        
         #geneid_to_names.setdefault(geneid, set()).add(symbol) 
         geneid_to_name[geneid] = symbol
         for synonym in synonyms:
             geneid_to_synonyms.setdefault(geneid, set())
             geneid_to_synonyms[geneid].add(synonym)
+        
         for symbol in [symbol] + synonyms: # added for synonym parsing
             if symbol in name_to_geneid: 
                 if int(geneid) >= int(name_to_geneid[symbol]):
                     continue
                 print("Multiple geneids", name_to_geneid[symbol], geneid, symbol)
             name_to_geneid[symbol] = geneid
+    
     return geneid_to_name, name_to_geneid, geneid_to_synonyms
 
 

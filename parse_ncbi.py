@@ -71,13 +71,13 @@ def get_geneid_to_pubmeds(file_name, tax_id = "9606"):
     The file can be downloaded at: https://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2pubmed.gz
     """
     geneid_to_pubmeds = {}
-    with open(file_name) as f:
-        f.readline()
-        for line in f:
-            tax, geneid, pubmed_id = line.decode().strip().split("\t")
-            if tax != tax_id:
-                continue
-            geneid_to_pubmeds.setdefault(geneid, set()).add(pubmed_id)
+    f = gzip.open(file_name,'rb')
+    first_line = f.readline()
+    for line in f:
+        tax, geneid, pubmed_id = line.decode().strip().split("\t")
+        if tax != tax_id:
+            continue
+        geneid_to_pubmeds.setdefault(geneid, set()).add(pubmed_id)
     return geneid_to_pubmeds
 
 

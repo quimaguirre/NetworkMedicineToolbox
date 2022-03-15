@@ -1,3 +1,6 @@
+import os, sys
+import gzip
+
 def main():
     return
 
@@ -9,29 +12,29 @@ def get_geneid_symbol_mapping(file_name):
     geneid_to_name = {} # now contains only the official symbol
     name_to_geneid = {}
     geneid_to_synonyms = {}
-    with open(file_name) as f:
-        for line in f:
-            words = line.strip("\n").split("\t")
-            if len(words) == 2:
-                geneid, symbol = words
-            else:
-                tax_id, geneid, symbol, locus, alternatives = words[:5]
-                alternatives = alternatives.split("|")
-            geneid = geneid.strip() # strip in case mal formatted input file
-            symbol = symbol.strip()
-            if geneid == "" or symbol == "":
-                continue
-            #geneid_to_names.setdefault(geneid, set()).add(symbol) 
-            geneid_to_name[geneid] = symbol
-            for alternative in alternatives:
-                geneid_to_synonyms.setdefault(geneid)
-                geneid_to_synonyms[geneid].add(alternative)
-            for symbol in [symbol] + alternatives: # added for synonym parsing
-                if symbol in name_to_geneid: 
-                    if int(geneid) >= int(name_to_geneid[symbol]):
-                        continue
-                    print("Multiple geneids", name_to_geneid[symbol], geneid, symbol)
-                name_to_geneid[symbol] = geneid
+    f = gzip.open(file_name,'rb')
+    for line in f:
+        words = line.strip("\n").split("\t")
+        if len(words) == 2:
+            geneid, symbol = words
+        else:
+            tax_id, geneid, symbol, locus, alternatives = words[:5]
+            alternatives = alternatives.split("|")
+        geneid = geneid.strip() # strip in case mal formatted input file
+        symbol = symbol.strip()
+        if geneid == "" or symbol == "":
+            continue
+        #geneid_to_names.setdefault(geneid, set()).add(symbol) 
+        geneid_to_name[geneid] = symbol
+        for alternative in alternatives:
+            geneid_to_synonyms.setdefault(geneid)
+            geneid_to_synonyms[geneid].add(alternative)
+        for symbol in [symbol] + alternatives: # added for synonym parsing
+            if symbol in name_to_geneid: 
+                if int(geneid) >= int(name_to_geneid[symbol]):
+                    continue
+                print("Multiple geneids", name_to_geneid[symbol], geneid, symbol)
+            name_to_geneid[symbol] = geneid
     return geneid_to_name, name_to_geneid, geneid_to_synonyms
 
 

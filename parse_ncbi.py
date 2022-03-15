@@ -1,19 +1,52 @@
 import os, sys
 import gzip
 
-def main():
-    data_dir = "../../data/raw"
-    gene_info_file = os.path.join(data_dir, "Homo_sapiens.gene_info.gz")
-    gene2pubmed_file = os.path.join(data_dir, "gene2pubmed.gz")
-    gene2ensembl_file = os.path.join(data_dir, "gene2ensembl.gz")
-    gene2go_file = os.path.join(data_dir, "gene2go.gz")
 
-    geneid_to_name, name_to_geneid, name_to_synonyms, geneid_to_synonyms, geneid_to_taxid = parse_ncbi.get_geneid_symbol_mapping(gene_info_file)
-    geneid_to_pubmeds = parse_ncbi.get_geneid_to_pubmeds(gene2pubmed_file)
+def main():
+    """
+    Creates output files with the mappings from NCBI Gene
+    """
+    raw_data_dir = "../../data/raw"
+    out_data_dir = "../../data/out"
+    gene_info_file = os.path.join(raw_data_dir, "Homo_sapiens.gene_info.gz")
+    gene2pubmed_file = os.path.join(raw_data_dir, "gene2pubmed.gz")
+    gene2ensembl_file = os.path.join(raw_data_dir, "gene2ensembl.gz")
+    gene2go_file = os.path.join(raw_data_dir, "gene2go.gz")
+
+    geneid_to_name, name_to_geneid, name_to_synonyms, geneid_to_synonyms, geneid_to_db_to_ref, geneid_to_taxid = get_geneid_symbol_mapping(gene_info_file)
+    geneid_to_pubmeds = get_geneid_to_pubmeds(gene2pubmed_file)
     geneid_to_ensembl, geneid_to_accession, _ = get_geneid_to_ensembl(gene2ensembl_file)
     geneid_to_go, geneid_to_go_to_evidences, geneid_to_go_to_pubmeds, _ = get_geneid_to_go(gene2go_file)
 
+    # Create synonyms file
+    geneid_to_symbols_file = os.path.dir(out_data_dir, "Gene_Symbol_Synomym_python_{}.csv".format(version))
+    with open(geneid_to_symbols_file, 'w') as out_fd:
+        out_fd.write('ENTREZ_ID,HGNC_Symbol,HGNC_Alias')
+        for geneid in geneid_to_name:
+            name = geneid_to_name[geneid]
+            if geneid in geneid_to_synonyms:
+                synonyms = geneid_to_synonyms[geneid]
+                for synonym in synonyms:
+                    out_fd.write('{},{},{}'.format(geneid, name, synonym))
+            else:
+                out_fd.write('{},{},'.format(geneid, name))
+
+    # Create cross-references file
+    geneid_to_symbols_file = os.path.dir(out_data_dir, "Gene_Symbol_Other_Names_python_{}.csv".format(version))
+    with open(geneid_to_symbols_file, 'w') as out_fd:
+        out_fd.write('ENTREZ_ID,HGNC_Symbol,Source,Alternative_ID')
+        for geneid in geneid_to_name:
+            name = geneid_to_name[geneid]
+            if geneid in geneid_to_db_to_ref:
+                for geneid in geneid_to_db_to_ref:
+                    db = geneid_to_db_to_ref[geneid]
+                    for ref in geneid_to_db_to_ref[geneid][db]:
+                        out_fd.write('{},{},{},{}'.format(geneid, name, db, ref))
+            else:
+                out_fd.write('{},{},,'.format(geneid, name))
+
     return
+
 
 def get_geneid_symbol_mapping(file_name):
     """
@@ -25,6 +58,7 @@ def get_geneid_symbol_mapping(file_name):
     geneid_to_synonyms = {}
     name_to_synonyms = {}
     geneid_to_taxid = {}
+    geneid_to_db_to_ref = {}
 
     f = gzip.open(file_name,'rb')
     first_line = f.readline()
@@ -33,9 +67,10 @@ def get_geneid_symbol_mapping(file_name):
         if len(words) == 2:
             geneid, symbol = words
         else:
-            taxid, geneid, symbol, locus, synonyms = words[:5]
+            taxid, geneid, symbol, locus, synonyms, dbxrefs = words[:6]
             synonyms = synonyms.split("|")
-        #print(taxid, geneid, symbol, locus, synonyms)
+            dbxrefs = dbxrefs.split("|")
+        #print(taxid, geneid, symbol, locus, synonyms, dbxrefs)
 
         # Insert TaxID. There can only be one taxID for GeneID. If not, error
         if geneid not in geneid_to_taxid:
@@ -65,7 +100,13 @@ def get_geneid_symbol_mapping(file_name):
                 #print("Multiple geneids", name_to_geneid[symbol], geneid, symbol)
             name_to_geneid[symbol] = geneid
     
-    return geneid_to_name, name_to_geneid, name_to_synonyms, geneid_to_synonyms, geneid_to_taxid
+        for dbref in dbxrefs:
+            db, ref = dbref.split(':')
+            geneid_to_db_to_ref.setdefault(geneid, {})
+            geneid_to_db_to_ref[geneid].setdefault(db, set())
+            geneid_to_db_to_ref[geneid][db].add(ref)
+
+    return geneid_to_name, name_to_geneid, name_to_synonyms, geneid_to_synonyms, geneid_to_db_to_ref, geneid_to_taxid
 
 
 def get_geneid_to_pubmeds(file_name, tax_id = "9606"):

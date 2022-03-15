@@ -273,3 +273,6 @@ def obtain_header_fields(first_line):
 
     return fields_dict
 
+
+if __name__ == "__main__":
+    main()

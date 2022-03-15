@@ -101,10 +101,11 @@ def get_geneid_symbol_mapping(file_name):
             name_to_geneid[symbol] = geneid
     
         for dbref in dbxrefs:
-            db, ref = dbref.split(':')
-            geneid_to_db_to_ref.setdefault(geneid, {})
-            geneid_to_db_to_ref[geneid].setdefault(db, set())
-            geneid_to_db_to_ref[geneid][db].add(ref)
+            if dbref != '' and dbref != '-':
+                db, ref = dbref.split(':', 1)
+                geneid_to_db_to_ref.setdefault(geneid, {})
+                geneid_to_db_to_ref[geneid].setdefault(db, set())
+                geneid_to_db_to_ref[geneid][db].add(ref)
 
     return geneid_to_name, name_to_geneid, name_to_synonyms, geneid_to_synonyms, geneid_to_db_to_ref, geneid_to_taxid
 

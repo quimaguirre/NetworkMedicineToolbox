@@ -65,7 +65,7 @@ def get_geneid_symbol_mapping(file_name):
                 #print("Multiple geneids", name_to_geneid[symbol], geneid, symbol)
             name_to_geneid[symbol] = geneid
     
-    return geneid_to_name, name_to_geneid, geneid_to_synonyms, geneid_to_taxid
+    return geneid_to_name, name_to_geneid, name_to_synonyms, geneid_to_synonyms, geneid_to_taxid
 
 
 def get_geneid_to_pubmeds(file_name, tax_id = "9606"):

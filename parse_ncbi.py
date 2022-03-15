@@ -8,42 +8,43 @@ def main():
     """
     raw_data_dir = "../../data/raw"
     out_data_dir = "../../data/out"
+    version = "2022-03-15"
     gene_info_file = os.path.join(raw_data_dir, "Homo_sapiens.gene_info.gz")
     gene2pubmed_file = os.path.join(raw_data_dir, "gene2pubmed.gz")
     gene2ensembl_file = os.path.join(raw_data_dir, "gene2ensembl.gz")
     gene2go_file = os.path.join(raw_data_dir, "gene2go.gz")
 
     geneid_to_name, name_to_geneid, name_to_synonyms, geneid_to_synonyms, geneid_to_db_to_ref, geneid_to_taxid = get_geneid_symbol_mapping(gene_info_file)
-    geneid_to_pubmeds = get_geneid_to_pubmeds(gene2pubmed_file)
-    geneid_to_ensembl, geneid_to_accession, _ = get_geneid_to_ensembl(gene2ensembl_file)
-    geneid_to_go, geneid_to_go_to_evidences, geneid_to_go_to_pubmeds, _ = get_geneid_to_go(gene2go_file)
+    #geneid_to_pubmeds = get_geneid_to_pubmeds(gene2pubmed_file)
+    #geneid_to_ensembl, geneid_to_accession, _ = get_geneid_to_ensembl(gene2ensembl_file)
+    #geneid_to_go, geneid_to_go_to_evidences, geneid_to_go_to_pubmeds, _ = get_geneid_to_go(gene2go_file)
 
     # Create synonyms file
-    geneid_to_symbols_file = os.path.dir(out_data_dir, "Gene_Symbol_Synomym_python_{}.csv".format(version))
+    geneid_to_symbols_file = os.path.join(out_data_dir, "Gene_Symbol_Synonym_python_{}.csv".format(version))
     with open(geneid_to_symbols_file, 'w') as out_fd:
-        out_fd.write('ENTREZ_ID,HGNC_Symbol,HGNC_Alias')
+        out_fd.write('ENTREZ_ID,HGNC_Symbol,HGNC_Alias\n')
         for geneid in geneid_to_name:
             name = geneid_to_name[geneid]
             if geneid in geneid_to_synonyms:
                 synonyms = geneid_to_synonyms[geneid]
-                for synonym in synonyms:
-                    out_fd.write('{},{},{}'.format(geneid, name, synonym))
+                for synonym in sorted(synonyms):
+                    out_fd.write('{},{},{}\n'.format(geneid, name, synonym))
             else:
-                out_fd.write('{},{},'.format(geneid, name))
+                out_fd.write('{},{},\n'.format(geneid, name))
 
     # Create cross-references file
-    geneid_to_symbols_file = os.path.dir(out_data_dir, "Gene_Symbol_Other_Names_python_{}.csv".format(version))
+    geneid_to_symbols_file = os.path.join(out_data_dir, "Gene_Symbol_Other_Names_python_{}.csv".format(version))
     with open(geneid_to_symbols_file, 'w') as out_fd:
-        out_fd.write('ENTREZ_ID,HGNC_Symbol,Source,Alternative_ID')
+        out_fd.write('ENTREZ_ID,HGNC_Symbol,Source,Alternative_ID\n')
         for geneid in geneid_to_name:
             name = geneid_to_name[geneid]
             if geneid in geneid_to_db_to_ref:
-                for geneid in geneid_to_db_to_ref:
-                    db = geneid_to_db_to_ref[geneid]
-                    for ref in geneid_to_db_to_ref[geneid][db]:
-                        out_fd.write('{},{},{},{}'.format(geneid, name, db, ref))
+                dbs = geneid_to_db_to_ref[geneid]
+                for db in sorted(dbs):
+                    for ref in sorted(geneid_to_db_to_ref[geneid][db]):
+                        out_fd.write('{},{},{},{}\n'.format(geneid, name, db, ref))
             else:
-                out_fd.write('{},{},,'.format(geneid, name))
+                out_fd.write('{},{},,\n'.format(geneid, name))
 
     return
 
@@ -88,10 +89,11 @@ def get_geneid_symbol_mapping(file_name):
         #geneid_to_names.setdefault(geneid, set()).add(symbol) 
         geneid_to_name[geneid] = symbol
         for synonym in synonyms:
-            geneid_to_synonyms.setdefault(geneid, set())
-            geneid_to_synonyms[geneid].add(synonym)
-            name_to_synonyms.setdefault(symbol, set())
-            name_to_synonyms[symbol].add(synonym)
+            if synonym != '' and synonym != '-':
+                geneid_to_synonyms.setdefault(geneid, set())
+                geneid_to_synonyms[geneid].add(synonym)
+                name_to_synonyms.setdefault(symbol, set())
+                name_to_synonyms[symbol].add(synonym)
         
         for symbol in [symbol] + synonyms: # added for synonym parsing
             if symbol in name_to_geneid: 

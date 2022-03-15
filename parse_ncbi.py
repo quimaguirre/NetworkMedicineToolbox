@@ -13,23 +13,25 @@ def get_geneid_symbol_mapping(file_name):
     name_to_geneid = {}
     geneid_to_synonyms = {}
     f = gzip.open(file_name,'rb')
+    first_line = f.readline()
     for line in f:
-        words = line.strip("\n").split("\t")
+        words = (line.decode()).strip('\n').split('\t')
         if len(words) == 2:
             geneid, symbol = words
         else:
-            tax_id, geneid, symbol, locus, alternatives = words[:5]
-            alternatives = alternatives.split("|")
+            tax_id, geneid, symbol, locus, synonyms = words[:5]
+            synonyms = synonyms.split("|")
+        #print(tax_id, geneid, symbol, locus, synonyms)
         geneid = geneid.strip() # strip in case mal formatted input file
         symbol = symbol.strip()
-        if geneid == "" or symbol == "":
+        if geneid == "" or geneid == None or symbol == "" or symbol == None:
             continue
         #geneid_to_names.setdefault(geneid, set()).add(symbol) 
         geneid_to_name[geneid] = symbol
-        for alternative in alternatives:
-            geneid_to_synonyms.setdefault(geneid)
-            geneid_to_synonyms[geneid].add(alternative)
-        for symbol in [symbol] + alternatives: # added for synonym parsing
+        for synonym in synonyms:
+            geneid_to_synonyms.setdefault(geneid, set())
+            geneid_to_synonyms[geneid].add(synonym)
+        for symbol in [symbol] + synonyms: # added for synonym parsing
             if symbol in name_to_geneid: 
                 if int(geneid) >= int(name_to_geneid[symbol]):
                     continue
